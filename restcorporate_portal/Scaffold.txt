@@ -1,0 +1,22 @@
+﻿// Create models & context
+
+dotnet ef dbcontext scaffold "Server=localhost;Encrypt=False;Integrated Security=False;User ID=sa;Password=WDbzs1t6xw42;Database=corporate" Microsoft.EntityFrameworkCore.SqlServer -o Models
+
+
+/// Controller for models
+
+// Badge
+
+dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name BadgeController -api -m restcorporate_portal.Models.Badge -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers
+
+// Product
+dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name ProductController -api -m restcorporate_portal.Models.Product -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers
+
+// Project
+dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name ProjectController -api -m restcorporate_portal.Models.Project -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers
+
+// Difficulty
+dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name DifficultyController -api -m restcorporate_portal.Models.Difficulty -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers
+
+// Priority
+dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name PriorityController -api -m restcorporate_portal.Models.Priority -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers

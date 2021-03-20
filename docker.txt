@@ -1,0 +1,15 @@
+### Create container
+
+sudo docker pull mcr.microsoft.com/mssql/server:2019-latest
+
+## Run server
+
+docker run -d --name corporate_sql_server -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=WDbzs1t6xw42' -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
+
+## Check status container
+
+docker ps
+
+## Shell info
+
+docker exec -it <mycontainer> bash
