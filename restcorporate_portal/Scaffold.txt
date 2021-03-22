@@ -1,6 +1,6 @@
 ﻿// Create models & context
 
-dotnet ef dbcontext scaffold "Server=localhost;Encrypt=False;Integrated Security=False;User ID=sa;Password=WDbzs1t6xw42;Database=corporate" Microsoft.EntityFrameworkCore.SqlServer -o Models
+dotnet ef dbcontext scaffold "Server=localhost;Encrypt=False;Integrated Security=False;User ID=sa;Password=WDbzs1t6xw42;Database=corporate" Microsoft.EntityFrameworkCore.SqlServer -o Models -d
 
 
 /// Controller for models

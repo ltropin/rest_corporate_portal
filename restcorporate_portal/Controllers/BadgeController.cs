@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using restcorporate_portal.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace restcorporate_portal.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/badges")]
     [ApiController]
     public class BadgeController : ControllerBase
     {
@@ -21,6 +22,10 @@ namespace restcorporate_portal.Controllers
         }
 
         // GET: api/Badge
+        [SwaggerOperation(
+            Summary = "",
+            Tags = new string []{ "Награды" }
+        )]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Badge>>> GetBadges()
         {
@@ -28,6 +33,10 @@ namespace restcorporate_portal.Controllers
         }
 
         // GET: api/Badge/5
+        [SwaggerOperation(
+            Summary = "",
+            Tags = new string[] { "Награды" }
+        )]
         [HttpGet("{id}")]
         public async Task<ActionResult<Badge>> GetBadge(int id)
         {
@@ -43,6 +52,10 @@ namespace restcorporate_portal.Controllers
 
         // PUT: api/Badge/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [SwaggerOperation(
+            Summary = "",
+            Tags = new string[] { "Награды" }
+        )]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBadge(int id, Badge badge)
         {
@@ -74,6 +87,10 @@ namespace restcorporate_portal.Controllers
 
         // POST: api/Badge
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [SwaggerOperation(
+            Summary = "",
+            Tags = new string[] { "Награды" }
+        )]
         [HttpPost]
         public async Task<ActionResult<Badge>> PostBadge(Badge badge)
         {
@@ -84,6 +101,10 @@ namespace restcorporate_portal.Controllers
         }
 
         // DELETE: api/Badge/5
+        [SwaggerOperation(
+            Summary = "",
+            Tags = new string[] { "Награды" }
+        )]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBadge(int id)
         {

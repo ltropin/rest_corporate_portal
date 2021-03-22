@@ -8,23 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace restcorporate_portal.Models
 {
-    [Table("Priority")]
-    public partial class Priority
+    [Table("File")]
+    public partial class File
     {
-        public Priority()
-        {
-            Tasks = new HashSet<Task>();
-        }
-
         [Key]
         [Column("ID")]
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
+        public string Extension { get; set; }
         [Required]
-        public string IconUrl { get; set; }
-
-        [InverseProperty(nameof(Task.Priorirty))]
-        public virtual ICollection<Task> Tasks { get; set; }
+        public string Url { get; set; }
     }
 }

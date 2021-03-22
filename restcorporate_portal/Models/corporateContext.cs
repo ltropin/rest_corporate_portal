@@ -23,6 +23,7 @@ namespace restcorporate_portal.Models
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<Difficulty> Difficulties { get; set; }
         public virtual DbSet<FavoriteProductsWorker> FavoriteProductsWorkers { get; set; }
+        public virtual DbSet<File> Files { get; set; }
         public virtual DbSet<PreviousProductsWorker> PreviousProductsWorkers { get; set; }
         public virtual DbSet<Priority> Priorities { get; set; }
         public virtual DbSet<Product> Products { get; set; }
@@ -33,26 +34,16 @@ namespace restcorporate_portal.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=localhost;Encrypt=False;Integrated Security=False;User ID=sa;Password=WDbzs1t6xw42;Database=corporate");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
-
-            modelBuilder.Entity<Badge>(entity =>
-            {
-                entity.ToTable("Badge");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Description).IsRequired();
-
-                entity.Property(e => e.Icon)
-                    .IsRequired()
-                    .HasColumnType("image");
-
-                entity.Property(e => e.Name).IsRequired();
-            });
 
             modelBuilder.Entity<BadgesWorker>(entity =>
             {
@@ -71,15 +62,7 @@ namespace restcorporate_portal.Models
 
             modelBuilder.Entity<Comment>(entity =>
             {
-                entity.ToTable("Comment");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Text).IsRequired();
-
-                entity.Property(e => e.Time)
-                    .HasColumnType("date")
-                    .HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.Time).HasDefaultValueSql("(getdate())");
 
                 entity.HasOne(d => d.Task)
                     .WithMany(p => p.Comments)
@@ -87,34 +70,8 @@ namespace restcorporate_portal.Models
                     .HasConstraintName("FK_Comment_Task_ID");
             });
 
-            modelBuilder.Entity<Department>(entity =>
-            {
-                entity.ToTable("Department");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Name).IsRequired();
-            });
-
-            modelBuilder.Entity<Difficulty>(entity =>
-            {
-                entity.ToTable("Difficulty");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Icon)
-                    .IsRequired()
-                    .HasColumnType("image");
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(50);
-            });
-
             modelBuilder.Entity<FavoriteProductsWorker>(entity =>
             {
-                entity.Property(e => e.Id).HasColumnName("ID");
-
                 entity.HasOne(d => d.FavoriteProduct)
                     .WithMany(p => p.FavoriteProductsWorkers)
                     .HasForeignKey(d => d.FavoriteProductId)
@@ -128,8 +85,6 @@ namespace restcorporate_portal.Models
 
             modelBuilder.Entity<PreviousProductsWorker>(entity =>
             {
-                entity.Property(e => e.Id).HasColumnName("ID");
-
                 entity.HasOne(d => d.PreviousProduct)
                     .WithMany(p => p.PreviousProductsWorkers)
                     .HasForeignKey(d => d.PreviousProductId)
@@ -141,53 +96,8 @@ namespace restcorporate_portal.Models
                     .HasConstraintName("FK_PreviousProductsWorkers_Worker_ID");
             });
 
-            modelBuilder.Entity<Priority>(entity =>
-            {
-                entity.ToTable("Priority");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Icon)
-                    .IsRequired()
-                    .HasColumnType("image");
-
-                entity.Property(e => e.Name).IsRequired();
-            });
-
-            modelBuilder.Entity<Product>(entity =>
-            {
-                entity.ToTable("Product");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Descriptiom).IsRequired();
-
-                entity.Property(e => e.Image)
-                    .IsRequired()
-                    .HasColumnType("image");
-
-                entity.Property(e => e.Name).IsRequired();
-            });
-
-            modelBuilder.Entity<Project>(entity =>
-            {
-                entity.ToTable("Project");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Description).IsRequired();
-
-                entity.Property(e => e.Name).IsRequired();
-            });
-
             modelBuilder.Entity<Speciality>(entity =>
             {
-                entity.ToTable("Speciality");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Name).IsRequired();
-
                 entity.HasOne(d => d.Department)
                     .WithMany(p => p.Specialities)
                     .HasForeignKey(d => d.DepartmentId)
@@ -196,15 +106,11 @@ namespace restcorporate_portal.Models
 
             modelBuilder.Entity<Task>(entity =>
             {
-                entity.ToTable("Task");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Description).IsRequired();
-
-                entity.Property(e => e.ExpirationDate).HasColumnType("date");
-
-                entity.Property(e => e.Title).IsRequired();
+                entity.HasOne(d => d.Author)
+                    .WithMany(p => p.TaskAuthors)
+                    .HasForeignKey(d => d.AuthorId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Task_Author_ID");
 
                 entity.HasOne(d => d.Difficulty)
                     .WithMany(p => p.Tasks)
@@ -215,30 +121,15 @@ namespace restcorporate_portal.Models
                     .WithMany(p => p.Tasks)
                     .HasForeignKey(d => d.PriorirtyId)
                     .HasConstraintName("FK_Task_Priority_ID");
+
+                entity.HasOne(d => d.Worker)
+                    .WithMany(p => p.TaskWorkers)
+                    .HasForeignKey(d => d.WorkerId)
+                    .HasConstraintName("FK_Task_Worker_ID");
             });
 
             modelBuilder.Entity<Worker>(entity =>
             {
-                entity.ToTable("Worker");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Avatar)
-                    .IsRequired()
-                    .HasColumnType("image");
-
-                entity.Property(e => e.Email).IsRequired();
-
-                entity.Property(e => e.FirstName)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.Property(e => e.LastName)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.Property(e => e.Password).IsRequired();
-
                 entity.HasOne(d => d.Project)
                     .WithMany(p => p.Workers)
                     .HasForeignKey(d => d.ProjectId)
