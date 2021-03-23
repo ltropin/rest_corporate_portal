@@ -40,7 +40,7 @@ namespace restcorporate_portal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<corporateContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalConnection")));
+            services.AddDbContext<corporateContext>(options => options.UseSqlServer(Configuration.GetConnectionString("KekConnection")));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -93,15 +93,15 @@ namespace restcorporate_portal
 
             });
 
-            //services.Configure<IISServerOptions>(options =>
-            //{
-            //    options.MaxRequestBodySize = long.MaxValue;
-            //});
-
-            services.Configure<KestrelServerOptions>(options =>
+            services.Configure<IISServerOptions>(options =>
             {
-                options.Limits.MaxRequestBodySize = long.MaxValue;
+                options.MaxRequestBodySize = long.MaxValue;
             });
+
+            //services.Configure<KestrelServerOptions>(options =>
+            //{
+            //    options.Limits.MaxRequestBodySize = long.MaxValue;
+            //});
             
         }
 
