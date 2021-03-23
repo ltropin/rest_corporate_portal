@@ -17,7 +17,6 @@ namespace restcorporate_portal.Models
         [Required]
         public string Name { get; set; }
         public string Extension { get; set; }
-        [Required]
         public string Url { get; set; }
     }
 }

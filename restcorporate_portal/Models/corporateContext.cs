@@ -29,6 +29,7 @@ namespace restcorporate_portal.Models
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<Project> Projects { get; set; }
         public virtual DbSet<Speciality> Specialities { get; set; }
+        public virtual DbSet<Status> Statuses { get; set; }
         public virtual DbSet<Task> Tasks { get; set; }
         public virtual DbSet<Worker> Workers { get; set; }
 
@@ -106,12 +107,6 @@ namespace restcorporate_portal.Models
 
             modelBuilder.Entity<Task>(entity =>
             {
-                entity.HasOne(d => d.Author)
-                    .WithMany(p => p.TaskAuthors)
-                    .HasForeignKey(d => d.AuthorId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Task_Author_ID");
-
                 entity.HasOne(d => d.Difficulty)
                     .WithMany(p => p.Tasks)
                     .HasForeignKey(d => d.DifficultyId)
@@ -122,8 +117,13 @@ namespace restcorporate_portal.Models
                     .HasForeignKey(d => d.PriorirtyId)
                     .HasConstraintName("FK_Task_Priority_ID");
 
+                entity.HasOne(d => d.Status)
+                    .WithMany(p => p.Tasks)
+                    .HasForeignKey(d => d.StatusId)
+                    .HasConstraintName("FK_Task_Status_ID");
+
                 entity.HasOne(d => d.Worker)
-                    .WithMany(p => p.TaskWorkers)
+                    .WithMany(p => p.Tasks)
                     .HasForeignKey(d => d.WorkerId)
                     .HasConstraintName("FK_Task_Worker_ID");
             });

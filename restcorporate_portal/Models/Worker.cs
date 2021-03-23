@@ -16,8 +16,7 @@ namespace restcorporate_portal.Models
             BadgesWorkers = new HashSet<BadgesWorker>();
             FavoriteProductsWorkers = new HashSet<FavoriteProductsWorker>();
             PreviousProductsWorkers = new HashSet<PreviousProductsWorker>();
-            TaskAuthors = new HashSet<Task>();
-            TaskWorkers = new HashSet<Task>();
+            Tasks = new HashSet<Task>();
         }
 
         [Key]
@@ -34,28 +33,24 @@ namespace restcorporate_portal.Models
         [Required]
         public string Password { get; set; }
         public int Experience { get; set; }
-        [Required]
-        [Column(TypeName = "image")]
-        public byte[] Avatar { get; set; }
+        public string AvatarUrl { get; set; }
         public int Balance { get; set; }
         public int SpecialityId { get; set; }
         public int? ProjectId { get; set; }
 
-        [ForeignKey(nameof(ProjectId))]
-        [InverseProperty("Workers")]
+        //[ForeignKey(nameof(ProjectId))]
+        //[InverseProperty("Workers")]
         public virtual Project Project { get; set; }
-        [ForeignKey(nameof(SpecialityId))]
-        [InverseProperty("Workers")]
+        //[ForeignKey(nameof(SpecialityId))]
+        //[InverseProperty("Workers")]
         public virtual Speciality Speciality { get; set; }
-        [InverseProperty(nameof(BadgesWorker.Worker))]
+        //[InverseProperty(nameof(BadgesWorker.Worker))]
         public virtual ICollection<BadgesWorker> BadgesWorkers { get; set; }
-        [InverseProperty(nameof(FavoriteProductsWorker.Worker))]
+        //[InverseProperty(nameof(FavoriteProductsWorker.Worker))]
         public virtual ICollection<FavoriteProductsWorker> FavoriteProductsWorkers { get; set; }
-        [InverseProperty(nameof(PreviousProductsWorker.Worker))]
+        //[InverseProperty(nameof(PreviousProductsWorker.Worker))]
         public virtual ICollection<PreviousProductsWorker> PreviousProductsWorkers { get; set; }
-        [InverseProperty(nameof(Task.Author))]
-        public virtual ICollection<Task> TaskAuthors { get; set; }
-        [InverseProperty(nameof(Task.Worker))]
-        public virtual ICollection<Task> TaskWorkers { get; set; }
+        //[InverseProperty(nameof(Task.Worker))]
+        public virtual ICollection<Task> Tasks { get; set; }
     }
 }

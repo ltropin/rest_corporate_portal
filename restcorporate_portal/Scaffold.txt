@@ -20,3 +20,9 @@ dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorpo
 
 // Priority
 dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name PriorityController -api -m restcorporate_portal.Models.Priority -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers
+
+// Department
+dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name DepartmentController -api -m restcorporate_portal.Models.Department -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers
+
+// Speciality
+dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name SpecialityController -api -m restcorporate_portal.Models.Speciality -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers

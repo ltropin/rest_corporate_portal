@@ -18,6 +18,13 @@ using Microsoft.OpenApi.Models;
 using restcorporate_portal.Models;
 using restcorporate_portal.Options;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using restcorporate_portal.Utils.Filters;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using restcorporate_portal.Utils.JWT;
 
 namespace restcorporate_portal
 {
@@ -44,10 +51,58 @@ namespace restcorporate_portal
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
-
+                //c.OperationFilter<DeleteOperationFilter>();
                 c.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      \r\n\r\nExample: 'Bearer 12345abcdef'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
             });
             services.AddDirectoryBrowser();
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = int.MaxValue;
+                x.MultipartBodyLengthLimit = long.MaxValue;
+                x.MultipartHeadersLengthLimit = int.MaxValue;
+            });
+
+            var key = Encoding.ASCII.GetBytes(JWTSettings.Secret);
+
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+
+            });
+
+            //services.Configure<IISServerOptions>(options =>
+            //{
+            //    options.MaxRequestBodySize = long.MaxValue;
+            //});
+
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = long.MaxValue;
+            });
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,9 +119,10 @@ namespace restcorporate_portal
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseStaticFiles();
-
+            
             var swaggerOptions = new SwaggerOptions();
             Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
 
@@ -84,24 +140,6 @@ namespace restcorporate_portal
             {
                 endpoints.MapControllers();
             });
-        }
-
-        private static string OperationIdStrategy(ApiDescription apiDescription)
-        {
-            return "";
-        }
-
-        private static string SchemaIdStrategy(Type currentClass)
-        {
-            var className = currentClass.Name;
-            switch(className) {
-                //case nameof(Badge):
-                //    return "Награды";
-                //case nameof(File):
-                //    return "Файлы";
-                default:
-                    return className;
-            }
         }
     }
 }

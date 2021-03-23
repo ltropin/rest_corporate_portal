@@ -31,18 +31,19 @@ namespace restcorporate_portal.Models
         public int PriorirtyId { get; set; }
         public int AuthorId { get; set; }
         public int WorkerId { get; set; }
+        public int StatusId { get; set; }
 
-        [ForeignKey(nameof(AuthorId))]
-        [InverseProperty("TaskAuthors")]
-        public virtual Worker Author { get; set; }
         [ForeignKey(nameof(DifficultyId))]
         [InverseProperty("Tasks")]
         public virtual Difficulty Difficulty { get; set; }
         [ForeignKey(nameof(PriorirtyId))]
         [InverseProperty(nameof(Priority.Tasks))]
         public virtual Priority Priorirty { get; set; }
+        [ForeignKey(nameof(StatusId))]
+        [InverseProperty("Tasks")]
+        public virtual Status Status { get; set; }
         [ForeignKey(nameof(WorkerId))]
-        [InverseProperty("TaskWorkers")]
+        [InverseProperty("Tasks")]
         public virtual Worker Worker { get; set; }
         [InverseProperty(nameof(Comment.Task))]
         public virtual ICollection<Comment> Comments { get; set; }

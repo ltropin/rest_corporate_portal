@@ -11,9 +11,19 @@ using Microsoft.EntityFrameworkCore;
 using Models = restcorporate_portal.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.Extensions.Configuration;
+using restcorporate_portal.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace restcorporate_portal.Controllers
 {
+    static class ErrorsMessages
+    {
+        public const string FileNotFound = "FILE_NOT_FOUND";
+        public const string FileNotFoundOrUploadEmptyFile = "FILE_NOT_FOUND_OR_UPLOAD_EMPTY_FILE";
+        public const string QueryParametrsMustBeNotNull = "QUERY_PARAMETRS_MUST_BE_NOT_NULL";
+    }
+
+
     [Route("api/files")]
     [ApiController]
     public class FilesController : ControllerBase
@@ -22,6 +32,7 @@ namespace restcorporate_portal.Controllers
         private readonly IConfiguration _configuration;
         private readonly Models.corporateContext _context;
         private string _basePath { get => _enviroment.ContentRootPath + "/Upload/"; }
+        private string _fileDownloadPart { get => @"/api/files/download?filename="; }
 
         public FilesController(IWebHostEnvironment environment, Models.corporateContext context, IConfiguration configuration)
         {
@@ -35,6 +46,7 @@ namespace restcorporate_portal.Controllers
             Summary = "Получает список всех записей о файлах",
             Tags = new string[] { "Файлы" }
         )]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<Models.File>))]
         [HttpGet]
         public async Task<ActionResult<List<Models.File>>> GetFiles()
         {
@@ -43,25 +55,41 @@ namespace restcorporate_portal.Controllers
                 Id = el.Id,
                 Name = el.Name,
                 Extension = el.Extension,
-                Url = _configuration.GetValue<string>("Url") + "/api/files/" + el.Name,
+                Url = _configuration.GetValue<string>("Url") + _fileDownloadPart + el.Name,
             }).ToListAsync();
             
             return Ok(files);
         }
 
-        // GET: api/files/download/{filename}
+        // GET: api/files/download?id={id}&filename={filename}
         [SwaggerOperation(
-            Summary = "Получение файла по названию и расширению",
+            Summary = "Получение файла по названию и расширению или id",
             Tags = new string[] { "Файлы" }
         )]
-        [Route("download/{filename}"), HttpGet]
-        public async Task<ActionResult<byte[]>> GetFileDownloadByName(string filename)
+        [Route("download")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(byte[]))]
+        [HttpGet]
+        public async Task<ActionResult<byte[]>> GetFileDownload([FromQuery] string filename, [FromQuery] int? id)
         {
-            var file = await _context.Files.SingleOrDefaultAsync(file => file.Name == filename);
+            if (filename == null && id == null)
+            {
+                return NotFound(new ExceptionInfo {
+                    Message = ErrorsMessages.QueryParametrsMustBeNotNull,
+                    Description = "Параметры не должны быть null"
+                });
+            }
+            //var files = await _context.Files.ToListAsync();
+            var file = await _context.Files.SingleOrDefaultAsync(file => filename != null  && file.Name == filename ||
+                id.HasValue && file.Id == id.Value); ;
 
             if (file == null)
             {
-                return NotFound();
+                return NotFound(new ExceptionInfo
+                {
+                    Message = ErrorsMessages.FileNotFound,
+                    Description = "Файл не найден"
+                });
             }
 
             var isFileExist = IO.File.Exists(_basePath + file.Name);
@@ -75,75 +103,47 @@ namespace restcorporate_portal.Controllers
             }
             else
             {
-                return NotFound();
+                return NotFound(new ExceptionInfo
+                {
+                    Message = ErrorsMessages.FileNotFound,
+                    Description = "Файл не найден"
+                });
             }
         }
 
-        // GET: api/files/download/{id}
-        [SwaggerOperation(
-            Summary = "Получение файла по Id",
-            Tags = new string[] { "Файлы" }
-        )]
-        [Route("download/{id}"), HttpGet]
-        public async Task<ActionResult<byte[]>> GetFileDownloadById(int id)
-        {
-            var file = await _context.Files.SingleOrDefaultAsync(file => file.Id == id);
-
-            if (file == null)
-            {
-                return NotFound();
-            }
-
-            var isFileExist = IO.File.Exists(_basePath + file.Name);
-
-            if (isFileExist)
-            {
-                var filePath = _basePath + file.Name;
-                var fileBytes = await IO.File.ReadAllBytesAsync(_basePath + file.Name);
-                new FileExtensionContentTypeProvider().TryGetContentType(IO.Path.GetFileName(filePath), out var contentType);
-                return File(fileBytes, contentType ?? "application/octet-stream", file.Name);
-            }
-            else
-            {
-                return NotFound();
-            }
-        }
-
-        // GET: api/files/info/{id}
+        // GET: api/files/info/?id={id}&filename={filename}
         [SwaggerOperation(
             Summary = "Получает информацию о файле из базы данных по Id",
             Tags = new string[] { "Файлы" }
         )]
-        [Route("info/{id}"), HttpGet]
-        public async Task<ActionResult<byte[]>> GetFileInfoById(int id)
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(Models.File))]
+        [Route("info")]
+        [HttpGet]
+        public async Task<ActionResult<Models.File>> GetFileInfoById([FromQuery] int? id, [FromQuery] string filename)
         {
-            var file = await _context.Files.SingleOrDefaultAsync(file => file.Id == id);
+            if (id == null && filename == null)
+            {
+                return NotFound(new ExceptionInfo
+                {
+                    Message = ErrorsMessages.QueryParametrsMustBeNotNull,
+                    Description = "Параметры не должны быть null"
+                });
+            }
+
+
+            var file = await _context.Files.SingleOrDefaultAsync(file => filename != null && file.Name == filename ||
+                id.HasValue && file.Id == id.Value);
 
             if (file == null)
             {
-                return NotFound();
+                return NotFound(new ExceptionInfo
+                {
+                    Message = ErrorsMessages.FileNotFound,
+                    Description = "Файл не найден"
+                });
             }
-            file.Url = _configuration.GetValue<string>("Url") + "/api/files/" + file.Name;
-            return Ok();
-        }
-
-        // GET: api/files/info/{filename}
-        [SwaggerOperation(
-            Summary = "Получает информацию о файле из базы данных по названию файла и расширению",
-            Tags = new string[] { "Файлы" }
-        )]
-        [Route("info/{filename}"), HttpGet]
-        //[HttpGet("{id}")]
-        public async Task<ActionResult<byte[]>> GetFileInfoByFileName(string filename)
-        {
-            var file = await _context.Files.SingleOrDefaultAsync(file => file.Name == filename);
-
-            if (file == null)
-            {
-                return NotFound();
-            }
-            file.Url = _configuration.GetValue<string>("Url") + "/api/files/" + file.Name;
-
+            file.Url = _configuration.GetValue<string>("Url") + _fileDownloadPart + file.Name;
             return Ok(file);
         }
 
@@ -152,31 +152,46 @@ namespace restcorporate_portal.Controllers
             Summary = "Загружает картинку на сервер и создает запись в базе данных",
             Tags = new string[] { "Файлы" }
         )]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(Models.File))]
         [HttpPost]
         public async Task<ActionResult<Models.File>> PostFile(IFormFile file)
         {
             if (file != null && file.Length > 0)
             {
-                if (!IO.Directory.Exists(_enviroment.ContentRootPath + "/Upload/"))
+                if (!IO.Directory.Exists(_basePath))
                 {
-                    IO.Directory.CreateDirectory(_enviroment.ContentRootPath + "/Upload/");
+                    IO.Directory.CreateDirectory(_basePath);
                 }
 
-                var fullFileName = IO.Path.GetRandomFileName() + ".jpg";
+                var splittedFileName = file.FileName.Split('.');
+                var extension = splittedFileName.Count() > 1 ? splittedFileName.Last() : null;
+
+                var fullFileName = IO.Path.GetRandomFileName();
+                if (extension != null)
+                {
+                    fullFileName += $".{extension}";
+                }
+               
                 var tmpFile = new Models.File {
-                    Name = fullFileName
+                    Name = fullFileName,
+                    Extension = extension,
+                    Url = _configuration.GetValue<string>("Url") + _fileDownloadPart + fullFileName
                 };
                 _context.Files.Add(tmpFile);
                 await _context.SaveChangesAsync();
 
-                using var fileStream = IO.File.Create(_enviroment.ContentRootPath + "/Upload/" + fullFileName);
+                using var fileStream = IO.File.Create(_basePath + fullFileName);
                 await file.CopyToAsync(fileStream);
 
                 return Ok(tmpFile);
             }
             else
             {
-                return NotFound();
+                return NotFound(new ExceptionInfo {
+                    Message = ErrorsMessages.FileNotFoundOrUploadEmptyFile,
+                    Description = "Файл не найден или загружен пустой файл"
+                });
             }
         }
 
@@ -185,13 +200,19 @@ namespace restcorporate_portal.Controllers
             Summary = "Удаляет файл по Id",
             Tags = new string[] { "Файлы" }
         )]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Успешно")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFile(int id)
         {
             var file = await _context.Files.FindAsync(id);
             if (file == null)
             {
-                return NotFound();
+                return NotFound(new ExceptionInfo
+                {
+                    Message = ErrorsMessages.FileNotFound,
+                    Description = "Файл не найден"
+                });
             }
 
             _context.Files.Remove(file);
