@@ -20,10 +20,9 @@ namespace restcorporate_portal.Models
         [Column("ID")]
         public int Id { get; set; }
         [Required]
-        [StringLength(50)]
         public string Name { get; set; }
         [Required]
-        public string IconUrl { get; set; }
+        public string Description { get; set; }
 
         [InverseProperty(nameof(Task.Difficulty))]
         public virtual ICollection<Task> Tasks { get; set; }

@@ -13,6 +13,8 @@ using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.Extensions.Configuration;
 using restcorporate_portal.Exceptions;
 using Microsoft.AspNetCore.Authorization;
+using restcorporate_portal.Utils;
+using restcorporate_portal.ResponseModels;
 
 namespace restcorporate_portal.Controllers
 {
@@ -32,7 +34,6 @@ namespace restcorporate_portal.Controllers
         private readonly IConfiguration _configuration;
         private readonly Models.corporateContext _context;
         private string _basePath { get => _enviroment.ContentRootPath + "/Upload/"; }
-        private string _fileDownloadPart { get => @"/api/files/download?filename="; }
 
         public FilesController(IWebHostEnvironment environment, Models.corporateContext context, IConfiguration configuration)
         {
@@ -46,17 +47,11 @@ namespace restcorporate_portal.Controllers
             Summary = "Получает список всех записей о файлах",
             Tags = new string[] { "Файлы" }
         )]
-        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<Models.File>))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseFileList>))]
         [HttpGet]
-        public async Task<ActionResult<List<Models.File>>> GetFiles()
+        public async Task<ActionResult<List<ResponseFileList>>> GetFiles()
         {
-            var files = await _context.Files.Select(el => new Models.File
-            {
-                Id = el.Id,
-                Name = el.Name,
-                Extension = el.Extension,
-                Url = _configuration.GetValue<string>("Url") + _fileDownloadPart + el.Name,
-            }).ToListAsync();
+            var files = await _context.Files.Select(el => ResponseFileList.FromApiFile(el)).ToListAsync();
             
             return Ok(files);
         }
@@ -117,7 +112,7 @@ namespace restcorporate_portal.Controllers
             Tags = new string[] { "Файлы" }
         )]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
-        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(Models.File))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(ResponseFileList))]
         [Route("info")]
         [HttpGet]
         public async Task<ActionResult<Models.File>> GetFileInfoById([FromQuery] int? id, [FromQuery] string filename)
@@ -143,8 +138,8 @@ namespace restcorporate_portal.Controllers
                     Description = "Файл не найден"
                 });
             }
-            file.Url = _configuration.GetValue<string>("Url") + _fileDownloadPart + file.Name;
-            return Ok(file);
+            
+            return Ok(ResponseFileList.FromApiFile(file));
         }
 
         // POST: api/files
@@ -176,7 +171,6 @@ namespace restcorporate_portal.Controllers
                 var tmpFile = new Models.File {
                     Name = fullFileName,
                     Extension = extension,
-                    Url = _configuration.GetValue<string>("Url") + _fileDownloadPart + fullFileName
                 };
                 _context.Files.Add(tmpFile);
                 await _context.SaveChangesAsync();
@@ -184,7 +178,7 @@ namespace restcorporate_portal.Controllers
                 using var fileStream = IO.File.Create(_basePath + fullFileName);
                 await file.CopyToAsync(fileStream);
 
-                return Ok(tmpFile);
+                return Ok(ResponseFileList.FromApiFile(tmpFile));
             }
             else
             {

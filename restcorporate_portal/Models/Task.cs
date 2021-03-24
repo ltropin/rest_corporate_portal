@@ -25,13 +25,17 @@ namespace restcorporate_portal.Models
         public string Description { get; set; }
         [Column(TypeName = "date")]
         public DateTime ExpirationDate { get; set; }
-        public int Reward { get; set; }
+        public int RewardCoins { get; set; }
         public string AttachedFileUrl { get; set; }
         public int DifficultyId { get; set; }
         public int PriorirtyId { get; set; }
         public int AuthorId { get; set; }
         public int WorkerId { get; set; }
         public int StatusId { get; set; }
+        [Column(TypeName = "date")]
+        public DateTime DateUpdate { get; set; }
+        [Column("RewardXP")]
+        public int RewardXp { get; set; }
 
         [ForeignKey(nameof(DifficultyId))]
         [InverseProperty("Tasks")]

@@ -12,6 +12,7 @@ using restcorporate_portal.Utils;
 using restcorporate_portal.Utils.Validators;
 using restcorporate_portal.Utils.JWT;
 using Microsoft.EntityFrameworkCore;
+using restcorporate_portal.ResponseModels;
 
 namespace restcorporate_portal.Controllers
 {
@@ -65,7 +66,7 @@ namespace restcorporate_portal.Controllers
                 var token = JWTExtension.CreateToken(existUser);
                 return Ok(new Models.WorkerWithToken {
                     Token = token,
-                    Worker = existUser,
+                    Worker = ResponseWorkerList.FromApiWorker(existUser),
                 });
             }
             else
@@ -123,7 +124,7 @@ namespace restcorporate_portal.Controllers
                 return Ok(new Models.WorkerWithToken
                 {
                     Token = token,
-                    Worker = newWorker,
+                    Worker = ResponseWorkerList.FromApiWorker(newWorker),
                 });
             }
             else

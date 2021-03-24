@@ -22,7 +22,7 @@ namespace restcorporate_portal.Models
         [Required]
         public string Name { get; set; }
         [Required]
-        public string IconUrl { get; set; }
+        public string Description { get; set; }
 
         [InverseProperty(nameof(Task.Priorirty))]
         public virtual ICollection<Task> Tasks { get; set; }

@@ -40,7 +40,7 @@ namespace restcorporate_portal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<corporateContext>(options => options.UseSqlServer(Configuration.GetConnectionString("KekConnection")));
+            services.AddDbContext<corporateContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalConnection")));
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
                 builder.AllowAnyOrigin()
@@ -105,11 +105,11 @@ namespace restcorporate_portal
                 options.MaxRequestBodySize = long.MaxValue;
             });
 
-            //services.Configure<KestrelServerOptions>(options =>
-            //{
-            //    options.Limits.MaxRequestBodySize = long.MaxValue;
-            //});
-            
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = long.MaxValue;
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

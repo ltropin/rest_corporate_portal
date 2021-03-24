@@ -63,8 +63,6 @@ namespace restcorporate_portal.Models
 
             modelBuilder.Entity<Comment>(entity =>
             {
-                entity.Property(e => e.Time).HasDefaultValueSql("(getdate())");
-
                 entity.HasOne(d => d.Task)
                     .WithMany(p => p.Comments)
                     .HasForeignKey(d => d.TaskId)

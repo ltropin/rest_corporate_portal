@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace restcorporate_portal.Models
 {
     [Table("Worker")]
+    [Index(nameof(Email), Name = "AK_Email", IsUnique = true)]
     public partial class Worker
     {
         public Worker()
@@ -29,6 +30,7 @@ namespace restcorporate_portal.Models
         [StringLength(50)]
         public string LastName { get; set; }
         [Required]
+        [StringLength(100)]
         public string Email { get; set; }
         [Required]
         public string Password { get; set; }
@@ -38,19 +40,19 @@ namespace restcorporate_portal.Models
         public int SpecialityId { get; set; }
         public int? ProjectId { get; set; }
 
-        //[ForeignKey(nameof(ProjectId))]
-        //[InverseProperty("Workers")]
+        [ForeignKey(nameof(ProjectId))]
+        [InverseProperty("Workers")]
         public virtual Project Project { get; set; }
-        //[ForeignKey(nameof(SpecialityId))]
-        //[InverseProperty("Workers")]
+        [ForeignKey(nameof(SpecialityId))]
+        [InverseProperty("Workers")]
         public virtual Speciality Speciality { get; set; }
-        //[InverseProperty(nameof(BadgesWorker.Worker))]
+        [InverseProperty(nameof(BadgesWorker.Worker))]
         public virtual ICollection<BadgesWorker> BadgesWorkers { get; set; }
-        //[InverseProperty(nameof(FavoriteProductsWorker.Worker))]
+        [InverseProperty(nameof(FavoriteProductsWorker.Worker))]
         public virtual ICollection<FavoriteProductsWorker> FavoriteProductsWorkers { get; set; }
-        //[InverseProperty(nameof(PreviousProductsWorker.Worker))]
+        [InverseProperty(nameof(PreviousProductsWorker.Worker))]
         public virtual ICollection<PreviousProductsWorker> PreviousProductsWorkers { get; set; }
-        //[InverseProperty(nameof(Task.Worker))]
+        [InverseProperty(nameof(Task.Worker))]
         public virtual ICollection<Task> Tasks { get; set; }
     }
 }

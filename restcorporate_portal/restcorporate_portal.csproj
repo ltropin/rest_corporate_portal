@@ -41,6 +41,7 @@
     <Folder Include="Utils\Validators\" />
     <Folder Include="Utils\Validators\Errors\" />
     <Folder Include="RequestModels\" />
+    <Folder Include="ResponseModels\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

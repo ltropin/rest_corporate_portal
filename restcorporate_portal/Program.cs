@@ -25,7 +25,10 @@ namespace restcorporate_portal
                 try
                 {
                     var context = services.GetRequiredService<corporateContext>();
-                    //SampleProducts.Initialize(context);
+                    SampleFiles.Initialize(context);
+                    SampleDepartment.Initialize(context);
+                    SampleSpecialities.Initialize(context);
+                    SampleStatuses.Initialize(context);
                 }
                 catch (Exception ex)
                 {
