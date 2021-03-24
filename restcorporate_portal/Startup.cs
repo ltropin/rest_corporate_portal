@@ -41,6 +41,13 @@ namespace restcorporate_portal
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<corporateContext>(options => options.UseSqlServer(Configuration.GetConnectionString("KekConnection")));
+            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -118,6 +125,8 @@ namespace restcorporate_portal
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("MyPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();

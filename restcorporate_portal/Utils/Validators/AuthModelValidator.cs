@@ -12,7 +12,7 @@ namespace restcorporate_portal.Utils.Validators
         {
             // Password
             RuleFor(x => x.Password)
-                .Matches(@"^[а-яА-Я]{0,}$")
+                .Matches(@"[а-яА-Я]{0,}")
                     .WithErrorCode(PasswordValidatorErrors.ContainLatinChars)
                     .WithMessage("Пароль должен содержать только русские символы")
                 .NotEmpty()
