@@ -16,12 +16,12 @@ namespace restcorporate_portal.ResponseModels
         public string Description { get; set; }
         [Column(TypeName = "date")]
         public DateTime ExpirationDate { get; set; }
-        public string ShortExpirationDate { get => ExpirationDate.ToShortDateString(); }
+        public string ShortExpirationDate { get => ExpirationDate.ToString("dd.MM.yyyy"); }
         public int RewardCoins { get; set; }
 
         public string AttachedFileUrl { get; set; }
 
-        public bool IsExpired { get => DateTime.Now < ExpirationDate; }
+        public bool IsExpired { get => DateTime.Now > ExpirationDate; }
         [Column(TypeName = "date")]
         public DateTime DateUpdate { get; set; }
         [Column("RewardXP")]

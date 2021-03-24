@@ -49,7 +49,7 @@ namespace restcorporate_portal.Controllers
                 .ToListAsync();
 
             return Ok(tasks.Select(x => {
-                var isExpired = DateTime.Now < x.ExpirationDate;
+                var isExpired = DateTime.Now > x.ExpirationDate;
                 var iconName = x.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
                 var icon = isExpired ?
                     _context.Files.SingleOrDefault(y => y.Name == "Expired.png") :
@@ -89,7 +89,7 @@ namespace restcorporate_portal.Controllers
             var fileName = task?.AttachedFileUrl?.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
 
             var file = fileName != null ? await _context.Files.SingleOrDefaultAsync(x => x.Name == fileName) : null;
-            var isExpired = DateTime.Now < task.ExpirationDate;
+            var isExpired = DateTime.Now > task.ExpirationDate;
             var iconName = task.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
             var icon = isExpired ?
                 await _context.Files.SingleOrDefaultAsync(x => x.Name == "Expired.png") :
@@ -131,7 +131,7 @@ namespace restcorporate_portal.Controllers
             var fileName = task?.AttachedFileUrl?.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
 
             var file = fileName != null ? await _context.Files.SingleOrDefaultAsync(x => x.Name == fileName) : null;
-            var isExpired = DateTime.Now < task.ExpirationDate;
+            var isExpired = DateTime.Now > task.ExpirationDate;
             var iconName = task.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
             var icon = isExpired ?
                 await _context.Files.SingleOrDefaultAsync(x => x.Name == "Expired.png") :
@@ -162,7 +162,7 @@ namespace restcorporate_portal.Controllers
                 .ToListAsync();
 
             return Ok(tasks.Select(x => {
-                var isExpired = DateTime.Now < x.ExpirationDate;
+                var isExpired = DateTime.Now > x.ExpirationDate;
                 var iconName = x.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
                 var icon = isExpired ?
                     _context.Files.SingleOrDefault(y => y.Name == "Expired.png") :
