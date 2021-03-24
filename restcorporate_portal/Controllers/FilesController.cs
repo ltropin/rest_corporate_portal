@@ -15,6 +15,7 @@ using restcorporate_portal.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using restcorporate_portal.Utils;
 using restcorporate_portal.ResponseModels;
+using System.Runtime.InteropServices;
 
 namespace restcorporate_portal.Controllers
 {
@@ -33,7 +34,7 @@ namespace restcorporate_portal.Controllers
         private readonly IWebHostEnvironment _enviroment;
         private readonly IConfiguration _configuration;
         private readonly Models.corporateContext _context;
-        private string _basePath { get => _enviroment.ContentRootPath + "/Upload/"; }
+        private string _basePath { get => Constans.OSFilesPath(_enviroment.ContentRootPath); }
 
         public FilesController(IWebHostEnvironment environment, Models.corporateContext context, IConfiguration configuration)
         {
@@ -48,12 +49,13 @@ namespace restcorporate_portal.Controllers
             Tags = new string[] { "Файлы" }
         )]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseFileList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         public async Task<ActionResult<List<ResponseFileList>>> GetFiles()
         {
-            var files = await _context.Files.Select(el => ResponseFileList.FromApiFile(el)).ToListAsync();
+            var files = await _context.Files.ToListAsync();
             
-            return Ok(files);
+            return Ok(files.Select(el => ResponseFileList.FromApiFile(el)));
         }
 
         // GET: api/files/download?id={id}&filename={filename}
@@ -64,6 +66,7 @@ namespace restcorporate_portal.Controllers
         [Route("download")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(byte[]))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         public async Task<ActionResult<byte[]>> GetFileDownload([FromQuery] string filename, [FromQuery] int? id)
         {
@@ -113,6 +116,7 @@ namespace restcorporate_portal.Controllers
         )]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(ResponseFileList))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [Route("info")]
         [HttpGet]
         public async Task<ActionResult<Models.File>> GetFileInfoById([FromQuery] int? id, [FromQuery] string filename)
@@ -149,6 +153,7 @@ namespace restcorporate_portal.Controllers
         )]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(Models.File))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public async Task<ActionResult<Models.File>> PostFile(IFormFile file)
         {
@@ -196,6 +201,7 @@ namespace restcorporate_portal.Controllers
         )]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Успешно")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFile(int id)
         {

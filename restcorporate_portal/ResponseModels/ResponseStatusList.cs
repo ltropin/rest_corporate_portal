@@ -16,6 +16,7 @@ namespace restcorporate_portal.ResponseModels
         public string IconUrl { get; set; }
 
         public static ResponseStatusList FromApiStatus(Status value) =>
+            value == null ? null :
             new ResponseStatusList
             {
                 Id = value.Id,

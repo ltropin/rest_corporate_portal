@@ -5,7 +5,7 @@ using restcorporate_portal.Models;
 
 namespace restcorporate_portal.ResponseModels
 {
-    public class ResponseDifficultyList
+    public class ResponseStatusDetail
     {
         [Key]
         [Column("ID")]
@@ -13,15 +13,15 @@ namespace restcorporate_portal.ResponseModels
         [Required]
         public string Name { get; set; }
         [Required]
-        public string Description { get; set; }
+        public ResponseFileList Icon { get; set; }
 
-        public static ResponseDifficultyList FromApiDifficulty(Difficulty value) =>
+        public static ResponseStatusDetail FromApiStatus(Status value, ResponseFileList icon) =>
             value == null ? null :
-            new ResponseDifficultyList
+            new ResponseStatusDetail
             {
                 Id = value.Id,
                 Name = value.Name,
-                Description = value.Description,
+                Icon = icon,
             };
     }
 }

@@ -29,6 +29,10 @@ namespace restcorporate_portal
                     SampleDepartment.Initialize(context);
                     SampleSpecialities.Initialize(context);
                     SampleStatuses.Initialize(context);
+                    SamplePriority.Initialize(context);
+                    SampleDifficulties.Initialize(context);
+                    SampleWorkers.Initialize(context);
+                    SampleTasks.Initialize(context);
                 }
                 catch (Exception ex)
                 {

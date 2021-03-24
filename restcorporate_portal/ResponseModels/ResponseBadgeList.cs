@@ -5,7 +5,7 @@ using restcorporate_portal.Models;
 
 namespace restcorporate_portal.ResponseModels
 {
-    public class ResponseDifficultyList
+    public class ResponseBadgeList
     {
         [Key]
         [Column("ID")]
@@ -14,14 +14,17 @@ namespace restcorporate_portal.ResponseModels
         public string Name { get; set; }
         [Required]
         public string Description { get; set; }
+        [Required]
+        public string IconUrl { get; set; }
 
-        public static ResponseDifficultyList FromApiDifficulty(Difficulty value) =>
+        public static ResponseBadgeList FromApiBadge(Badge value) =>
             value == null ? null :
-            new ResponseDifficultyList
+            new ResponseBadgeList
             {
                 Id = value.Id,
                 Name = value.Name,
                 Description = value.Description,
+                IconUrl = value.IconUrl,
             };
     }
 }

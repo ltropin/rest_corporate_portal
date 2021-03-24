@@ -28,5 +28,6 @@ dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorpo
 dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name SpecialityController -api -m restcorporate_portal.Models.Speciality -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers
 
 // Task
-
 dotnet-aspnet-codegenerator -p "/Users/admin/Documents/workingprojects/restcorporate_portal/restcorporate_portal" controller -name TaskController -api -m restcorporate_portal.Models.Task -dc corporateContext -outDir Controllers -namespace restcorporate_portal.Controllers
+
+// Di

@@ -17,6 +17,7 @@ namespace restcorporate_portal.ResponseModels
         public string Url { get => Constans.ApiUrl + Constans.FileDownloadPart + Name; }
 
         public static ResponseFileList FromApiFile(File value) =>
+            value == null ? null :
             new ResponseFileList
             {
                 Id = value.Id,

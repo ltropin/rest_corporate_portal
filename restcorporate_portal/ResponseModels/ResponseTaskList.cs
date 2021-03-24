@@ -26,20 +26,19 @@ namespace restcorporate_portal.ResponseModels
         [Column("RewardXP")]
         public int RewardXp { get; set; }
 
-        //[ForeignKey(nameof(DifficultyId))]
-        [InverseProperty("Tasks")]
         public virtual ResponseDifficultyList Difficulty { get; set; }
-        //[ForeignKey(nameof(PriorirtyId))]
-        [InverseProperty(nameof(Priority.Tasks))]
-        public virtual ResponsePriorityList Priorirty { get; set; }
-        //[ForeignKey(nameof(StatusId))]
-        [InverseProperty("Tasks")]
-        public virtual ResponseStatusList Status { get; set; }
-        //[ForeignKey(nameof(WorkerId))]
-        [InverseProperty("Tasks")]
-        public virtual ResponseWorkerList Worker { get; set; }
 
-        public static ResponseTaskList FromApiTask(Task value) =>
+        public virtual ResponsePriorityList Priorirty { get; set; }
+
+        public virtual ResponseStatusList Status { get; set; }
+
+        public virtual ResponseWorkerList Worker { get; set; }
+        public virtual ResponseWorkerList Author { get; set; }
+
+        public virtual ResponseFileList Icon { get; set; }
+
+        public static ResponseTaskList FromApiTask(Task value, File icon, Worker author) =>
+            value == null ? null :
             new ResponseTaskList
             {
                 Id = value.Id,
@@ -53,6 +52,8 @@ namespace restcorporate_portal.ResponseModels
                 Status = ResponseStatusList.FromApiStatus(value.Status),
                 Priorirty = ResponsePriorityList.FromApiPriority(value.Priorirty),
                 Worker = ResponseWorkerList.FromApiWorker(value.Worker),
+                Icon = ResponseFileList.FromApiFile(icon),
+                Author = ResponseWorkerList.FromApiWorker(author),
             };
     }
 }

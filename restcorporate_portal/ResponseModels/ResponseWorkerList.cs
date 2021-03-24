@@ -27,8 +27,10 @@ namespace restcorporate_portal.ResponseModels
         public int Experience { get; set; }
         public string AvatarUrl { get; set; }
         public int Balance { get; set; }
+        public virtual ResponseSpecialityList Speciality { get; set; }
 
         public static ResponseWorkerList FromApiWorker(Worker value) =>
+            value == null ? null :
             new ResponseWorkerList
             {
                 Id = value.Id,
@@ -39,6 +41,7 @@ namespace restcorporate_portal.ResponseModels
                 Experience = value.Experience,
                 Balance = value.Balance,
                 AvatarUrl = value.AvatarUrl,
+                Speciality = ResponseSpecialityList.FromApiSpeciality(value.Speciality),
             };
     }
 }

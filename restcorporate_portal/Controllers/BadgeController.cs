@@ -2,14 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using restcorporate_portal.Exceptions;
 using restcorporate_portal.Models;
+using restcorporate_portal.ResponseModels;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace restcorporate_portal.Controllers
 {
+    static class BadgeErrorsMessages
+    {
+        public const string BadgeNotFound = "BADGE_NOT_FOUND";
+        //public const string FileNotFoundOrUploadEmptyFile = "FILE_NOT_FOUND_OR_UPLOAD_EMPTY_FILE";
+        //public const string QueryParametrsMustBeNotNull = "QUERY_PARAMETRS_MUST_BE_NOT_NULL";
+    }
     [Route("api/badges")]
     [ApiController]
     public class BadgeController : ControllerBase
@@ -23,106 +32,114 @@ namespace restcorporate_portal.Controllers
 
         // GET: api/Badge
         [SwaggerOperation(
-            Summary = "",
+            Summary = "Возращает список наград",
             Tags = new string []{ "Награды" }
         )]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseBadgeList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Badge>>> GetBadges()
         {
-            return await _context.Badges.ToListAsync();
+            var badges = await _context.Badges.ToListAsync();
+            return Ok(badges.Select(x => ResponseBadgeList.FromApiBadge(x)).ToList());
         }
 
         // GET: api/Badge/5
         [SwaggerOperation(
-            Summary = "",
+            Summary = "Детальная информация награды по id",
             Tags = new string[] { "Награды" }
         )]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("{id}")]
-        public async Task<ActionResult<Badge>> GetBadge(int id)
+        public async Task<ActionResult<ResponseBadgeList>> GetBadge(int id)
         {
             var badge = await _context.Badges.FindAsync(id);
 
             if (badge == null)
             {
-                return NotFound();
+                return NotFound(new ExceptionInfo {
+                    Message = BadgeErrorsMessages.BadgeNotFound,
+                    Description = "Награда не найдена"
+                });
             }
 
-            return badge;
+            return Ok(ResponseBadgeList.FromApiBadge(badge));
         }
 
-        // PUT: api/Badge/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [SwaggerOperation(
-            Summary = "",
-            Tags = new string[] { "Награды" }
-        )]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBadge(int id, Badge badge)
-        {
-            if (id != badge.Id)
-            {
-                return BadRequest();
-            }
+        //// PUT: api/Badge/5
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[SwaggerOperation(
+        //    Summary = "",
+        //    Tags = new string[] { "Награды" }
+        //)]
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutBadge(int id, Badge badge)
+        //{
+        //    if (id != badge.Id)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Entry(badge).State = EntityState.Modified;
+        //    _context.Entry(badge).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BadgeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!BadgeExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
-        // POST: api/Badge
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [SwaggerOperation(
-            Summary = "",
-            Tags = new string[] { "Награды" }
-        )]
-        [HttpPost]
-        public async Task<ActionResult<Badge>> PostBadge(Badge badge)
-        {
-            _context.Badges.Add(badge);
-            await _context.SaveChangesAsync();
+        //// POST: api/Badge
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[SwaggerOperation(
+        //    Summary = "",
+        //    Tags = new string[] { "Награды" }
+        //)]
+        //[HttpPost]
+        //public async Task<ActionResult<Badge>> PostBadge(Badge badge)
+        //{
+        //    _context.Badges.Add(badge);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBadge", new { id = badge.Id }, badge);
-        }
+        //    return CreatedAtAction("GetBadge", new { id = badge.Id }, badge);
+        //}
 
-        // DELETE: api/Badge/5
-        [SwaggerOperation(
-            Summary = "",
-            Tags = new string[] { "Награды" }
-        )]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBadge(int id)
-        {
-            var badge = await _context.Badges.FindAsync(id);
-            if (badge == null)
-            {
-                return NotFound();
-            }
+        //// DELETE: api/Badge/5
+        //[SwaggerOperation(
+        //    Summary = "",
+        //    Tags = new string[] { "Награды" }
+        //)]
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteBadge(int id)
+        //{
+        //    var badge = await _context.Badges.FindAsync(id);
+        //    if (badge == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Badges.Remove(badge);
-            await _context.SaveChangesAsync();
+        //    _context.Badges.Remove(badge);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
-        private bool BadgeExists(int id)
-        {
-            return _context.Badges.Any(e => e.Id == id);
-        }
+        //private bool BadgeExists(int id)
+        //{
+        //    return _context.Badges.Any(e => e.Id == id);
+        //}
     }
 }

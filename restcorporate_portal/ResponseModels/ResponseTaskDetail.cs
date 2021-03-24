@@ -27,8 +27,6 @@ namespace restcorporate_portal.ResponseModels
         [Column("RewardXP")]
         public int RewardXp { get; set; }
 
-
-
         public virtual ResponseDifficultyList Difficulty { get; set; }
 
         public virtual ResponsePriorityList Priorirty { get; set; }
@@ -36,10 +34,15 @@ namespace restcorporate_portal.ResponseModels
         public virtual ResponseStatusList Status { get; set; }
 
         public virtual ResponseWorkerList Worker { get; set; }
-        [SwaggerSchema(Nullable = true)]
-        public virtual File File { get; set; }
 
-        public static ResponseTaskDetail FromApiTask(Task value, File fileValue = null) =>
+        public virtual ResponseWorkerList Author { get; set; }
+
+        [SwaggerSchema(Nullable = true)]
+        public virtual ResponseFileList AttachedFile { get; set; }
+        public virtual ResponseFileList Icon { get; set; }
+
+        public static ResponseTaskDetail FromApiTask(Task value, File icon, Worker author, File file = null) =>
+            value == null ? null :
             new ResponseTaskDetail
             {
                 Id = value.Id,
@@ -49,11 +52,13 @@ namespace restcorporate_portal.ResponseModels
                 DateUpdate = value.DateUpdate,
                 RewardCoins = value.RewardCoins,
                 RewardXp = value.RewardXp,
-                File = fileValue,
+                AttachedFile = ResponseFileList.FromApiFile(file),
                 Difficulty = ResponseDifficultyList.FromApiDifficulty(value.Difficulty),
                 Status = ResponseStatusList.FromApiStatus(value.Status),
                 Priorirty = ResponsePriorityList.FromApiPriority(value.Priorirty),
                 Worker = ResponseWorkerList.FromApiWorker(value.Worker),
+                Icon = ResponseFileList.FromApiFile(icon),
+                Author = ResponseWorkerList.FromApiWorker(author),
             };
     }
 }

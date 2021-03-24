@@ -30,7 +30,7 @@ namespace restcorporate_portal.Data.Initialize
                     {
                         Name = "bugs",
                         Description = "В отладке",
-                        IconUrl = Constans.ApiUrl + Constans.FileDownloadPart + "Draft.png",
+                        IconUrl = Constans.ApiUrl + Constans.FileDownloadPart + "InProgress.png",
 
                     },
                     new Status

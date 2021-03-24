@@ -59,7 +59,10 @@ namespace restcorporate_portal.Controllers
             }
 
             var hashPassword = HashPassword.Hash(authModel.Password);
-            var existUser = _context.Workers.SingleOrDefault(x => x.Email == authModel.Email && x.Password == hashPassword);
+            var existUser = _context.Workers
+                .Include(x => x.Speciality)
+                    .ThenInclude(x =>  x.Department)
+                .SingleOrDefault(x => x.Email == authModel.Email && x.Password == hashPassword);
 
             if (existUser != null)
             {
@@ -120,11 +123,15 @@ namespace restcorporate_portal.Controllers
                 var token = JWTExtension.CreateToken(newWorker);
                 _context.Workers.Add(newWorker);
                 await _context.SaveChangesAsync();
+                var registeredWorker = await _context.Workers
+                    .Include(x => x.Speciality)
+                        .ThenInclude(x => x.Department)
+                    .SingleOrDefaultAsync(x => x.Email == newWorker.Email && x.Password == newWorker.Password);
 
                 return Ok(new Models.WorkerWithToken
                 {
                     Token = token,
-                    Worker = ResponseWorkerList.FromApiWorker(newWorker),
+                    Worker = ResponseWorkerList.FromApiWorker(registeredWorker),
                 });
             }
             else

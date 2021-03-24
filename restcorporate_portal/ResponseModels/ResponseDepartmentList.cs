@@ -5,23 +5,20 @@ using restcorporate_portal.Models;
 
 namespace restcorporate_portal.ResponseModels
 {
-    public class ResponseDifficultyList
+    public class ResponseDepartmentList
     {
         [Key]
         [Column("ID")]
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
-        [Required]
-        public string Description { get; set; }
 
-        public static ResponseDifficultyList FromApiDifficulty(Difficulty value) =>
+        public static ResponseDepartmentList FromApiDepartment(Department value) =>
             value == null ? null :
-            new ResponseDifficultyList
+            new ResponseDepartmentList
             {
                 Id = value.Id,
                 Name = value.Name,
-                Description = value.Description,
             };
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,13 +31,14 @@ namespace restcorporate_portal.Controllers
         }
 
         // GET: api/tasks
-        [HttpGet]
         [SwaggerOperation(
             Summary = "Получение списка задач с статусами, сложностью, приорететом",
             Tags = new string[] { "Задачи" }
         )]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Models.Task>>> GetTasks()
         {
             var tasks = await _context.Tasks
@@ -45,7 +47,16 @@ namespace restcorporate_portal.Controllers
                 .Include(x => x.Priorirty)
                 .Include(x => x.Worker)
                 .ToListAsync();
-            return Ok(tasks.Select(x => ResponseTaskList.FromApiTask(x)).ToList());
+
+            return Ok(tasks.Select(x => {
+                var isExpired = DateTime.Now < x.ExpirationDate;
+                var iconName = x.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+                var icon = isExpired ?
+                    _context.Files.SingleOrDefault(y => y.Name == "Expired.png") :
+                    _context.Files.SingleOrDefault(y => y.Name == iconName);
+                var author = _context.Workers.SingleOrDefault(y => y.Id == x.AuthorId);
+                return ResponseTaskList.FromApiTask(x, author: author, icon: icon);
+            }).ToList());
         }
 
         // GET: api/tasks/5
@@ -55,6 +66,7 @@ namespace restcorporate_portal.Controllers
         )]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(ResponseTaskDetail))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ResponseTaskDetail>> GetTask(int id)
         {
@@ -62,6 +74,7 @@ namespace restcorporate_portal.Controllers
                 .Include(x => x.Worker)
                 .Include(x => x.Priorirty)
                 .Include(x => x.Difficulty)
+                .Include(x => x.Status)
                 .SingleOrDefaultAsync(x => x.Id == id);
 
 
@@ -76,8 +89,87 @@ namespace restcorporate_portal.Controllers
             var fileName = task?.AttachedFileUrl?.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
 
             var file = fileName != null ? await _context.Files.SingleOrDefaultAsync(x => x.Name == fileName) : null;
+            var isExpired = DateTime.Now < task.ExpirationDate;
+            var iconName = task.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+            var icon = isExpired ?
+                await _context.Files.SingleOrDefaultAsync(x => x.Name == "Expired.png") :
+                await _context.Files.SingleOrDefaultAsync(x => x.Name == iconName);
+            var author = _context.Workers.SingleOrDefault(x => x.Id == task.AuthorId);
+            return Ok(ResponseTaskDetail.FromApiTask(task, author: author, icon: icon, file: file));
+        }
 
-            return Ok(ResponseTaskDetail.FromApiTask(task, fileValue: file));
+        // GET: api/tasks/me/5
+        [SwaggerOperation(
+            Summary = "Просмотр задачи",
+            Tags = new string[] { "Задачи" }
+        )]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(ResponseTaskDetail))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Route("me")]
+        [HttpGet("me/{id}")]
+        public async Task<ActionResult<ResponseTaskDetail>> GetMyTask(int id)
+        {
+            var email = User.Identity.Name;
+            var task = await _context.Tasks
+                .Include(x => x.Worker)
+                .Include(x => x.Priorirty)
+                .Include(x => x.Difficulty)
+                .Include(x => x.Status)
+                .SingleOrDefaultAsync(x => x.Id == id && x.Worker.Email == email);
+
+
+            if (task == null)
+            {
+                return NotFound(new ExceptionInfo
+                {
+                    Message = TasksErrorsMessages.TaskNotFound,
+                    Description = "Задача не найдена",
+                });
+            }
+
+            var fileName = task?.AttachedFileUrl?.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+
+            var file = fileName != null ? await _context.Files.SingleOrDefaultAsync(x => x.Name == fileName) : null;
+            var isExpired = DateTime.Now < task.ExpirationDate;
+            var iconName = task.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+            var icon = isExpired ?
+                await _context.Files.SingleOrDefaultAsync(x => x.Name == "Expired.png") :
+                await _context.Files.SingleOrDefaultAsync(x => x.Name == iconName);
+            var author = _context.Workers.SingleOrDefault(x => x.Id == task.AuthorId);
+            return Ok(ResponseTaskDetail.FromApiTask(task, author: author, icon: icon, file: file));
+        }
+
+        // GET: api/tasks/me
+        [SwaggerOperation(
+            Summary = "Получение моего списка задач с статусами, сложностью, приорететом",
+            Tags = new string[] { "Задачи" }
+        )]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Route("me")]
+        [HttpGet("me/")]
+        public async Task<ActionResult<IEnumerable<Models.Task>>> GetMyTasks()
+        {
+            var email = User.Identity.Name;
+            var tasks = await _context.Tasks
+                .Include(x => x.Status)
+                .Include(x => x.Difficulty)
+                .Include(x => x.Priorirty)
+                .Include(x => x.Worker)
+                .Where(x => x.Worker.Email == email)
+                .ToListAsync();
+
+            return Ok(tasks.Select(x => {
+                var isExpired = DateTime.Now < x.ExpirationDate;
+                var iconName = x.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+                var icon = isExpired ?
+                    _context.Files.SingleOrDefault(y => y.Name == "Expired.png") :
+                    _context.Files.SingleOrDefault(y => y.Name == iconName);
+                var author = _context.Workers.SingleOrDefault(y => y.Id == x.AuthorId);
+                return ResponseTaskList.FromApiTask(x, author: author, icon: icon);
+            }).ToList());
         }
 
         // PUT: api/Task/5

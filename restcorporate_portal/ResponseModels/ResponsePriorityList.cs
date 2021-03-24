@@ -14,6 +14,7 @@ namespace restcorporate_portal.ResponseModels
         public string Name { get; set; }
 
         public static ResponsePriorityList FromApiPriority(Priority value) =>
+            value == null ? null :
             new ResponsePriorityList
             {
                 Id = value.Id,
