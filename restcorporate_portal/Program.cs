@@ -33,6 +33,7 @@ namespace restcorporate_portal
                     SampleDifficulties.Initialize(context);
                     SampleWorkers.Initialize(context);
                     SampleTasks.Initialize(context);
+                    SampleProducts.Initialize(context);
                 }
                 catch (Exception ex)
                 {

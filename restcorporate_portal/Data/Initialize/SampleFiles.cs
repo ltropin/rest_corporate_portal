@@ -31,6 +31,36 @@ namespace restcorporate_portal.Data.Initialize
                     {
                         Name = "Expired.png",
                         Extension = "png",
+                    },
+                    new File
+                    {
+                        Name = "b_launch.jpg",
+                        Extension = "jpg",
+                    },
+                    new File
+                    {
+                        Name = "coffe.jpg",
+                        Extension = "jpg",
+                    },
+                    new File
+                    {
+                        Name = "spa.jpg",
+                        Extension = "jpg",
+                    },
+                    new File
+                    {
+                        Name = "leave_early.jpg",
+                        Extension = "jpg",
+                    },
+                    new File
+                    {
+                        Name = "tshirt_logo.jpg",
+                        Extension = "jpg",
+                    },
+                    new File
+                    {
+                        Name = "weekend .jpg",
+                        Extension = "jpg",
                     }
                 );
                 context.SaveChanges();
