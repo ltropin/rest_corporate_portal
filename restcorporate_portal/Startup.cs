@@ -25,6 +25,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using restcorporate_portal.Utils.JWT;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 
 namespace restcorporate_portal
 {
@@ -47,6 +49,7 @@ namespace restcorporate_portal
                        .AllowAnyMethod()
                        .AllowAnyHeader();
             }));
+
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -114,9 +117,15 @@ namespace restcorporate_portal
 
             });
 
-            services.Configure<IISServerOptions>(options =>
+            //services.Configure<IISServerOptions>(options =>
+            //{
+            //    options.MaxRequestBodySize = long.MaxValue;
+            //});
+
+
+            services.Configure<ForwardedHeadersOptions>(options =>
             {
-                options.MaxRequestBodySize = long.MaxValue;
+                options.KnownProxies.Add(IPAddress.Parse("84.201.173.17"));
             });
 
             services.Configure<KestrelServerOptions>(options =>
@@ -141,6 +150,12 @@ namespace restcorporate_portal
             app.UseRouting();
 
             app.UseCors("MyPolicy");
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
 
             app.UseAuthentication();
             app.UseAuthorization();
