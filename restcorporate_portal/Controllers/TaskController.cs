@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using restcorporate_portal.Exceptions;
+using restcorporate_portal.RequestModels;
 using restcorporate_portal.ResponseModels;
 using restcorporate_portal.Utils;
 using Swashbuckle.AspNetCore.Annotations;
@@ -203,16 +204,56 @@ namespace restcorporate_portal.Controllers
         //    return NoContent();
         //}
 
-        //// POST: api/Task
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Models.Task>> PostTask(Models.Task task)
-        //{
-        //    _context.Tasks.Add(task);
-        //    await _context.SaveChangesAsync();
+        // POST: api/tasks/me/
+        [SwaggerOperation(
+            Summary = "Назначение записи",
+            Tags = new string[] { "Задачи" }
+        )]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(ResponseTaskDetail))]
+        [SwaggerResponse(StatusCodes.Status422UnprocessableEntity, "Ошибка валидации", type: typeof(List<ValidatorException>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost("me/")]
+        public async Task<ActionResult<ResponseTaskDetail>> PostTask([FromBody] CreateTask createTask)
+        {
+            if (string.IsNullOrEmpty(createTask.Title))
+            {
+                return UnprocessableEntity(new List<ValidatorException> {
+                    new ValidatorException
+                    {
+                        Field = "Title",
+                        Message = "TITLE_IS_REQUIRED",
+                        Description = "Поле Название обязательное для заполнения"
+                    }
+                });
+            }
 
-        //    return CreatedAtAction("GetTask", new { id = task.Id }, task);
-        //}
+
+            var email = User.Identity.Name;
+            var author = await _context.Workers.SingleOrDefaultAsync(x => x.Email == email);
+            var file = await _context.Files.SingleOrDefaultAsync(x => x.Id == createTask.FileId);
+
+            var newTask = new Models.Task
+            {
+                Title = createTask.Title,
+                Description = createTask.Description,
+                ExpirationDate = DateTime.ParseExact(createTask.ExpiredDate, "dd.MM.yyyy", null),
+                RewardCoins = createTask.RewardCoins,
+                RewardXp = createTask.RewardXp,
+                DifficultyId = createTask.DifficultyId,
+                PriorirtyId = createTask.PriorityId,
+                Status = await _context.Statuses.SingleAsync(x => x.Name == "to_do"),
+                WorkerId = createTask.WorkerId
+            };
+
+            _context.Tasks.Add(newTask);
+            await _context.SaveChangesAsync();
+
+            var createdTask = await _context.Tasks.SingleAsync(x => x.Id == newTask.Id);
+            var icon = await _context.Files.SingleOrDefaultAsync(x => x.Name == "Draft.png");
+
+            return Ok(ResponseTaskDetail.FromApiTask(createdTask, icon: icon, author: author, file: file));
+        }
 
         //// DELETE: api/Task/5
         //[HttpDelete("{id}")]
