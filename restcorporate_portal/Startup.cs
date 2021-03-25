@@ -42,7 +42,7 @@ namespace restcorporate_portal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<corporateContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalConnection")));
+            services.AddDbContext<corporateContext>(options => options.UseSqlServer(Configuration.GetConnectionString("RemoteConnection")));
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
                 builder.AllowAnyOrigin()
