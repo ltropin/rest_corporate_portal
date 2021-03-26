@@ -112,6 +112,8 @@ namespace restcorporate_portal.Controllers
             {
                 currentUser.Balance -= currentProduct.Price;
                 _context.Workers.Update(currentUser);
+                await _context.SaveChangesAsync();
+                //_context.Entry(currentUser).State = EntityState.Modified;
                 return Ok();
             }
             else
