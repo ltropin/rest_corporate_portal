@@ -120,20 +120,24 @@ namespace restcorporate_portal.Controllers
         //    return NoContent();
         //}
 
-        //// POST: api/Badge
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[SwaggerOperation(
-        //    Summary = "",
-        //    Tags = new string[] { "Награды" }
-        //)]
-        //[HttpPost]
-        //public async Task<ActionResult<Badge>> PostBadge(Badge badge)
-        //{
-        //    _context.Badges.Add(badge);
-        //    await _context.SaveChangesAsync();
+        // POST: api/badges/reward/
+        [SwaggerOperation(
+            Summary = "Наградить сотрудника достижением",
+            Tags = new string[] { "Награды" }
+        )]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно")]
+        [HttpPost("reward/")]
+        public async Task<ActionResult<Badge>> PostBadge([FromBody] int workerId, [FromBody] int badgeId)
+        {
+            _context.BadgesWorkers.Add(new BadgesWorker {
+                WorkerId = workerId,
+                BadgeId = badgeId
+            });
 
-        //    return CreatedAtAction("GetBadge", new { id = badge.Id }, badge);
-        //}
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
 
         //// DELETE: api/Badge/5
         //[SwaggerOperation(
