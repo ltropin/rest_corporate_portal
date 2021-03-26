@@ -123,10 +123,10 @@ namespace restcorporate_portal
             //});
 
 
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.KnownProxies.Add(IPAddress.Parse("84.201.173.17"));
-            });
+            //services.Configure<ForwardedHeadersOptions>(options =>
+            //{
+            //    options.KnownProxies.Add(IPAddress.Parse("84.201.173.17"));
+            //});
 
             services.Configure<KestrelServerOptions>(options =>
             {
@@ -146,6 +146,7 @@ namespace restcorporate_portal
             }
 
             //app.UseHttpsRedirection();
+            
 
             app.UseRouting();
 
