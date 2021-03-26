@@ -223,7 +223,7 @@ namespace restcorporate_portal.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         //[Route("me")]
         [HttpGet("me/filter")]
-        public async Task<ActionResult<IEnumerable<ResponseTaskList>>> GetMyTasksInprogress([FromQuery] string status)
+        public async Task<ActionResult<IEnumerable<ResponseTaskList>>> GetMyTasksStatus([FromQuery] string status)
         {
             var email = User.Identity.Name;
             var tasks = await _context.Tasks
