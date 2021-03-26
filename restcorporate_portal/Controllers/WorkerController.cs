@@ -42,6 +42,7 @@ namespace restcorporate_portal.Controllers
         {
             var workers = await _context.Workers
                 .Include(x => x.Speciality)
+                    .ThenInclude(x => x.Department)
                 .ToListAsync();
 
 
@@ -61,6 +62,7 @@ namespace restcorporate_portal.Controllers
         {
             var worker = await _context.Workers
                 .Include(x => x.Speciality)
+                    .ThenInclude(x => x.Department)
                 .SingleOrDefaultAsync(x => x.Id == id);
 
             if (worker == null)
