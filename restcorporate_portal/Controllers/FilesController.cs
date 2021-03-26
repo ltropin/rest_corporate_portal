@@ -49,7 +49,6 @@ namespace restcorporate_portal.Controllers
             Tags = new string[] { "Файлы" }
         )]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseFileList>))]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         public async Task<ActionResult<List<ResponseFileList>>> GetFiles()
         {
@@ -66,7 +65,6 @@ namespace restcorporate_portal.Controllers
         [Route("download")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(byte[]))]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         public async Task<ActionResult<byte[]>> GetFileDownload([FromQuery] string filename, [FromQuery] int? id)
         {
@@ -116,7 +114,6 @@ namespace restcorporate_portal.Controllers
         )]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(ResponseFileList))]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [Route("info")]
         [HttpGet]
         public async Task<ActionResult<Models.File>> GetFileInfoById([FromQuery] int? id, [FromQuery] string filename)
@@ -153,7 +150,6 @@ namespace restcorporate_portal.Controllers
         )]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(Models.File))]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public async Task<ActionResult<Models.File>> PostFile(IFormFile file)
         {
@@ -201,7 +197,6 @@ namespace restcorporate_portal.Controllers
         )]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Успешно")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFile(int id)
         {

@@ -30,7 +30,7 @@ namespace restcorporate_portal.Controllers
             _context = context;
         }
 
-        // GET: api/Badge
+        // GET: api/badges
         [SwaggerOperation(
             Summary = "Возращает список наград",
             Tags = new string []{ "Награды" }
@@ -45,7 +45,7 @@ namespace restcorporate_portal.Controllers
             return Ok(badges.Select(x => ResponseBadgeList.FromApiBadge(x)).ToList());
         }
 
-        // GET: api/Badge/5
+        // GET: api/badges/5
         [SwaggerOperation(
             Summary = "Детальная информация награды по id",
             Tags = new string[] { "Награды" }

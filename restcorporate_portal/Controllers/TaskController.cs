@@ -40,7 +40,7 @@ namespace restcorporate_portal.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Models.Task>>> GetTasks()
+        public async Task<ActionResult<IEnumerable<ResponseTaskList>>> GetTasks()
         {
             var tasks = await _context.Tasks
                 .Include(x => x.Status)
@@ -121,7 +121,7 @@ namespace restcorporate_portal.Controllers
 
         // GET: api/tasks/me/5
         [SwaggerOperation(
-            Summary = "Просмотр задачи",
+            Summary = "Просмотр моей задачи",
             Tags = new string[] { "Задачи" }
         )]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
@@ -168,6 +168,46 @@ namespace restcorporate_portal.Controllers
                 avatarWorker: _getAvatar(task.Worker.AvatarUrl),
                 avatarAuthor: _getAvatar(author.AvatarUrl)
             ));
+        }
+
+        // GET: api/tasks/me
+        [SwaggerOperation(
+            Summary = "Получение моего списка задач с статусами, сложностью, приорететом",
+            Tags = new string[] { "Задачи" }
+        )]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Route("me")]
+        [HttpGet("me/")]
+        public async Task<ActionResult<IEnumerable<ResponseTaskList>>> GetMyTasks()
+        {
+            var email = User.Identity.Name;
+            var tasks = await _context.Tasks
+                .Include(x => x.Status)
+                .Include(x => x.Difficulty)
+                .Include(x => x.Priorirty)
+                .Include(x => x.Worker)
+                    .ThenInclude(x => x.Speciality)
+                .Where(x => x.Worker.Email == email)
+                .ToListAsync();
+
+            return Ok(tasks.Select(x => {
+                var isExpired = DateTime.Now > x.ExpirationDate;
+                var iconName = x.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+                var icon = isExpired ?
+                    _context.Files.SingleOrDefault(y => y.Name == "Expired.png") :
+                    _context.Files.SingleOrDefault(y => y.Name == iconName);
+                var author = _context.Workers
+                    .Include(x => x.Speciality)
+                    .SingleOrDefault(y => y.Id == x.AuthorId);
+                return ResponseTaskList.FromApiTask(x,
+                    author: author,
+                    icon: icon,
+                    avatarWorker: _getAvatar(x.Worker.AvatarUrl),
+                    avatarAuthor: _getAvatar(author.AvatarUrl)
+                );
+            }).ToList());
         }
 
         // GET: api/tasks/me
