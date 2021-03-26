@@ -67,6 +67,24 @@ namespace restcorporate_portal.Controllers
             return Ok(ResponseBadgeList.FromApiBadge(badge));
         }
 
+        // GET: api/badges
+        [SwaggerOperation(
+            Summary = "Возращает список моих наград",
+            Tags = new string[] { "Награды" }
+        )]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseBadgeList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("me/")]
+        public async Task<ActionResult<IEnumerable<Badge>>> GetMyBadges()
+        {
+            var email = User.Identity.Name;
+            var worker = await _context.Workers
+                .Include(x => x.BadgesWorkers)
+                    .ThenInclude(x => x.Badge)
+                .SingleAsync(x => x.Email == email);
+            return Ok(worker.BadgesWorkers.Select(x => ResponseBadgeList.FromApiBadge(x.Badge)).ToList());
+        }
+
         //// PUT: api/Badge/5
         //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         //[SwaggerOperation(
