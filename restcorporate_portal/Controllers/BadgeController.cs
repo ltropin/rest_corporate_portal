@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using restcorporate_portal.Exceptions;
 using restcorporate_portal.Models;
+using restcorporate_portal.RequestModels;
 using restcorporate_portal.ResponseModels;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -127,11 +128,11 @@ namespace restcorporate_portal.Controllers
         )]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно")]
         [HttpPost("reward/")]
-        public async Task<ActionResult<Badge>> PostBadge([FromBody] int workerId, [FromBody] int badgeId)
+        public async Task<IActionResult> PostBadge(RequestBadgePost requestBadgePost)
         {
             _context.BadgesWorkers.Add(new BadgesWorker {
-                WorkerId = workerId,
-                BadgeId = badgeId
+                WorkerId = requestBadgePost.WorkerId,
+                BadgeId = requestBadgePost.BadgeId
             });
 
             await _context.SaveChangesAsync();
