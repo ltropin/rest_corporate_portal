@@ -41,6 +41,11 @@ namespace restcorporate_portal.Controllers
             _enviroment = environment;
             _context = context;
             _configuration = configuration;
+
+            if (!IO.Directory.Exists(_basePath))
+            {
+                IO.Directory.CreateDirectory(_basePath);
+            }
         }
 
         // GET: api/files
@@ -155,10 +160,6 @@ namespace restcorporate_portal.Controllers
         {
             if (file != null && file.Length > 0)
             {
-                if (!IO.Directory.Exists(_basePath))
-                {
-                    IO.Directory.CreateDirectory(_basePath);
-                }
 
                 var splittedFileName = file.FileName.Split('.');
                 var extension = splittedFileName.Count() > 1 ? splittedFileName.Last() : null;
