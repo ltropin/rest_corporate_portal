@@ -25,11 +25,11 @@ namespace restcorporate_portal.ResponseModels
         [Required]
         public string Password { get; set; }
         public int Experience { get; set; }
-        public string AvatarUrl { get; set; }
+        public ResponseFileList Avatar { get; set; }
         public int Balance { get; set; }
         public virtual ResponseSpecialityList Speciality { get; set; }
 
-        public static ResponseWorkerList FromApiWorker(Worker value) =>
+        public static ResponseWorkerList FromApiWorker(Worker value, File avatar = null) =>
             value == null ? null :
             new ResponseWorkerList
             {
@@ -40,7 +40,7 @@ namespace restcorporate_portal.ResponseModels
                 Password = null,
                 Experience = value.Experience,
                 Balance = value.Balance,
-                AvatarUrl = value.AvatarUrl,
+                Avatar = avatar != null ? ResponseFileList.FromApiFile(avatar) : null,
                 Speciality = ResponseSpecialityList.FromApiSpeciality(value.Speciality),
             };
     }

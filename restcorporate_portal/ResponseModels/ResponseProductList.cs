@@ -20,7 +20,9 @@ namespace restcorporate_portal.ResponseModels
 
         public bool IsFavorite { get; set; }
 
-        public static ResponseProductList FromApiProduct(Product value, File image, bool isFavorite) =>
+        public bool IsCanBuy { get; set; }
+
+        public static ResponseProductList FromApiProduct(Product value, File image, bool isFavorite, bool isCanBuy) =>
             value == null ? null :
             new ResponseProductList
             {
@@ -30,6 +32,7 @@ namespace restcorporate_portal.ResponseModels
                 Price = value.Price,
                 Image = ResponseFileList.FromApiFile(image),
                 IsFavorite = isFavorite,
+                IsCanBuy = isCanBuy
             };
     }
 }

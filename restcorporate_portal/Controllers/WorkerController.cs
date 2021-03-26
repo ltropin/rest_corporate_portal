@@ -2,14 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using restcorporate_portal.Exceptions;
 using restcorporate_portal.Models;
+using restcorporate_portal.ResponseModels;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace restcorporate_portal.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/workers")]
     [ApiController]
     public class WorkerController : ControllerBase
     {
@@ -20,14 +24,25 @@ namespace restcorporate_portal.Controllers
             _context = context;
         }
 
-        // GET: api/Worker
+        // GET: api/workers
+        [SwaggerOperation(
+            Summary = "Получение списка работяг",
+            Tags = new string[] { "Работяги" }
+        )]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseWorkerList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Worker>>> GetWorkers()
+        public async Task<ActionResult<IEnumerable<ResponseWorkerList>>> GetWorkers()
         {
-            return await _context.Workers.ToListAsync();
+            var workers = await _context.Workers
+                .Include(x => x.Speciality)
+                .ToListAsync();
+
+
+            return Ok(workers.Select(x => ResponseWorkerList.FromApiWorker(x)).ToList());
         }
 
-        // GET: api/Worker/5
+        // GET: api/workers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Worker>> GetWorker(int id)
         {

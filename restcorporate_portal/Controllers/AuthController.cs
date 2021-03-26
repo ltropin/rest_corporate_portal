@@ -63,13 +63,23 @@ namespace restcorporate_portal.Controllers
                 .Include(x => x.Speciality)
                     .ThenInclude(x =>  x.Department)
                 .SingleOrDefault(x => x.Email == authModel.Email && x.Password == hashPassword);
-
+            Models.File avatar;
+            if (existUser.AvatarUrl != null)
+            {
+                var fullFileName = existUser.AvatarUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+                avatar = _context.Files.SingleOrDefault(x => x.Name == fullFileName);
+            }
+            else
+            {
+                avatar = null;
+            }
+            
             if (existUser != null)
             {
                 var token = JWTExtension.CreateToken(existUser);
                 return Ok(new Models.WorkerWithToken {
                     Token = token,
-                    Worker = ResponseWorkerList.FromApiWorker(existUser),
+                    Worker = ResponseWorkerList.FromApiWorker(existUser, avatar: avatar),
                 });
             }
             else
@@ -131,7 +141,7 @@ namespace restcorporate_portal.Controllers
                 return Ok(new Models.WorkerWithToken
                 {
                     Token = token,
-                    Worker = ResponseWorkerList.FromApiWorker(registeredWorker),
+                    Worker = ResponseWorkerList.FromApiWorker(registeredWorker, avatar: _getAvatar(registeredWorker.AvatarUrl)),
                 });
             }
             else
@@ -141,6 +151,19 @@ namespace restcorporate_portal.Controllers
                     Message = AuthErrorsMessages.UserExist,
                     Description = "Сотрудник с таким Email и паролем уже существует"
                 });
+            }
+        }
+
+        Models.File _getAvatar(string avatarUrl)
+        {
+            if (avatarUrl != null)
+            {
+                var fullFileName = avatarUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+                return _context.Files.SingleOrDefault(x => x.Name == fullFileName);
+            }
+            else
+            {
+                return null;
             }
         }
     }

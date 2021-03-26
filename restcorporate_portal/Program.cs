@@ -49,6 +49,7 @@ namespace restcorporate_portal
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseKestrel();
+
                     webBuilder.UseStartup<Startup>();
                 });
     }

@@ -41,7 +41,12 @@ namespace restcorporate_portal.ResponseModels
         public virtual ResponseFileList AttachedFile { get; set; }
         public virtual ResponseFileList Icon { get; set; }
 
-        public static ResponseTaskDetail FromApiTask(Task value, File icon, Worker author, File file = null) =>
+        public static ResponseTaskDetail FromApiTask(Task value,
+            File icon,
+            Worker author,
+            File file = null,
+            File avatarWorker = null,
+            File avatarAuthor = null) =>
             value == null ? null :
             new ResponseTaskDetail
             {
@@ -56,9 +61,9 @@ namespace restcorporate_portal.ResponseModels
                 Difficulty = ResponseDifficultyList.FromApiDifficulty(value.Difficulty),
                 Status = ResponseStatusList.FromApiStatus(value.Status),
                 Priorirty = ResponsePriorityList.FromApiPriority(value.Priorirty),
-                Worker = ResponseWorkerList.FromApiWorker(value.Worker),
+                Worker = ResponseWorkerList.FromApiWorker(value.Worker, avatar: avatarWorker),
                 Icon = ResponseFileList.FromApiFile(icon),
-                Author = ResponseWorkerList.FromApiWorker(author),
+                Author = ResponseWorkerList.FromApiWorker(author, avatar: avatarAuthor),
             };
     }
 }

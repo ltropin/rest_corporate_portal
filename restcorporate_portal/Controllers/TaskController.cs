@@ -47,6 +47,7 @@ namespace restcorporate_portal.Controllers
                 .Include(x => x.Difficulty)
                 .Include(x => x.Priorirty)
                 .Include(x => x.Worker)
+                    .ThenInclude(x => x.Speciality)
                 .ToListAsync();
 
             return Ok(tasks.Select(x => {
@@ -55,8 +56,17 @@ namespace restcorporate_portal.Controllers
                 var icon = isExpired ?
                     _context.Files.SingleOrDefault(y => y.Name == "Expired.png") :
                     _context.Files.SingleOrDefault(y => y.Name == iconName);
-                var author = _context.Workers.SingleOrDefault(y => y.Id == x.AuthorId);
-                return ResponseTaskList.FromApiTask(x, author: author, icon: icon);
+                var author = _context.Workers
+                    .Include(x => x.Speciality)
+                    .SingleOrDefault(y => y.Id == x.AuthorId);
+
+
+                return ResponseTaskList.FromApiTask(x,
+                    author: author,
+                    icon: icon,
+                    avatarWorker: _getAvatar(x.Worker.AvatarUrl),
+                    avatarAuthor: _getAvatar(author.AvatarUrl)
+                );
             }).ToList());
         }
 
@@ -73,6 +83,7 @@ namespace restcorporate_portal.Controllers
         {
             var task = await _context.Tasks
                 .Include(x => x.Worker)
+                    .ThenInclude(x => x.Speciality)
                 .Include(x => x.Priorirty)
                 .Include(x => x.Difficulty)
                 .Include(x => x.Status)
@@ -95,8 +106,17 @@ namespace restcorporate_portal.Controllers
             var icon = isExpired ?
                 await _context.Files.SingleOrDefaultAsync(x => x.Name == "Expired.png") :
                 await _context.Files.SingleOrDefaultAsync(x => x.Name == iconName);
-            var author = _context.Workers.SingleOrDefault(x => x.Id == task.AuthorId);
-            return Ok(ResponseTaskDetail.FromApiTask(task, author: author, icon: icon, file: file));
+            var author = _context.Workers
+                .Include(x => x.Speciality)
+                .SingleOrDefault(x => x.Id == task.AuthorId);
+
+            return Ok(ResponseTaskDetail.FromApiTask(task,
+                author: author,
+                icon: icon,
+                file: file,
+                avatarWorker: _getAvatar(task.Worker.AvatarUrl),
+                avatarAuthor: _getAvatar(author.AvatarUrl)
+            ));
         }
 
         // GET: api/tasks/me/5
@@ -114,6 +134,7 @@ namespace restcorporate_portal.Controllers
             var email = User.Identity.Name;
             var task = await _context.Tasks
                 .Include(x => x.Worker)
+                    .ThenInclude(x => x.Speciality)
                 .Include(x => x.Priorirty)
                 .Include(x => x.Difficulty)
                 .Include(x => x.Status)
@@ -137,8 +158,16 @@ namespace restcorporate_portal.Controllers
             var icon = isExpired ?
                 await _context.Files.SingleOrDefaultAsync(x => x.Name == "Expired.png") :
                 await _context.Files.SingleOrDefaultAsync(x => x.Name == iconName);
-            var author = _context.Workers.SingleOrDefault(x => x.Id == task.AuthorId);
-            return Ok(ResponseTaskDetail.FromApiTask(task, author: author, icon: icon, file: file));
+            var author = _context.Workers
+                .Include(x => x.Speciality)
+                .SingleOrDefault(x => x.Id == task.AuthorId);
+            return Ok(ResponseTaskDetail.FromApiTask(task,
+                author: author,
+                icon: icon,
+                file: file,
+                avatarWorker: _getAvatar(task.Worker.AvatarUrl),
+                avatarAuthor: _getAvatar(author.AvatarUrl)
+            ));
         }
 
         // GET: api/tasks/me
@@ -159,6 +188,7 @@ namespace restcorporate_portal.Controllers
                 .Include(x => x.Difficulty)
                 .Include(x => x.Priorirty)
                 .Include(x => x.Worker)
+                    .ThenInclude(x => x.Speciality)
                 .Where(x => x.Worker.Email == email)
                 .ToListAsync();
 
@@ -168,8 +198,15 @@ namespace restcorporate_portal.Controllers
                 var icon = isExpired ?
                     _context.Files.SingleOrDefault(y => y.Name == "Expired.png") :
                     _context.Files.SingleOrDefault(y => y.Name == iconName);
-                var author = _context.Workers.SingleOrDefault(y => y.Id == x.AuthorId);
-                return ResponseTaskList.FromApiTask(x, author: author, icon: icon);
+                var author = _context.Workers
+                    .Include(x => x.Speciality)
+                    .SingleOrDefault(y => y.Id == x.AuthorId);
+                return ResponseTaskList.FromApiTask(x,
+                    author: author,
+                    icon: icon,
+                    avatarWorker: _getAvatar(x.Worker.AvatarUrl),
+                    avatarAuthor: _getAvatar(author.AvatarUrl)
+                );
             }).ToList());
         }
 
@@ -249,10 +286,35 @@ namespace restcorporate_portal.Controllers
             _context.Tasks.Add(newTask);
             await _context.SaveChangesAsync();
 
-            var createdTask = await _context.Tasks.SingleAsync(x => x.Id == newTask.Id);
+            var createdTask = await _context.Tasks
+                .Include(x => x.Worker)
+                    .ThenInclude(x => x.Speciality)
+                .Include(x => x.Status)
+                .Include(x => x.Priorirty)
+                .Include(x => x.Difficulty)
+                .SingleAsync(x => x.Id == newTask.Id);
             var icon = await _context.Files.SingleOrDefaultAsync(x => x.Name == "Draft.png");
 
-            return Ok(ResponseTaskDetail.FromApiTask(createdTask, icon: icon, author: author, file: file));
+            return Ok(ResponseTaskDetail.FromApiTask(createdTask,
+                icon: icon,
+                author: author,
+                file: file,
+                avatarWorker: _getAvatar(x.Worker.AvatarUrl),
+                avatarAuthor: _getAvatar(author.AvatarUrl)
+            ));
+        }
+
+        Models.File _getAvatar(string avatarUrl)
+        {
+            if (avatarUrl != null)
+            {
+                var fullFileName = avatarUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+                return _context.Files.SingleOrDefault(x => x.Name == fullFileName);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         //// DELETE: api/Task/5
