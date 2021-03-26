@@ -222,8 +222,8 @@ namespace restcorporate_portal.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
         [Authorize(AuthenticationSchemes = "Bearer")]
         //[Route("me")]
-        [HttpGet("me/filter/{status}")]
-        public async Task<ActionResult<IEnumerable<ResponseTaskList>>> GetMyTasksInprogress(string status)
+        [HttpGet("me/filter")]
+        public async Task<ActionResult<IEnumerable<ResponseTaskList>>> GetMyTasksInprogress([FromQuery] string status)
         {
             var email = User.Identity.Name;
             var tasks = await _context.Tasks
