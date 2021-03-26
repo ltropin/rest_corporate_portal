@@ -50,7 +50,8 @@ namespace restcorporate_portal.Controllers
                     .ThenInclude(x => x.Speciality)
                 .ToListAsync();
 
-            return Ok(tasks.Select(x => {
+            return Ok(tasks.Select(x =>
+            {
                 var isExpired = DateTime.Now > x.ExpirationDate;
                 var iconName = x.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
                 var icon = isExpired ?
@@ -92,7 +93,8 @@ namespace restcorporate_portal.Controllers
 
             if (task == null)
             {
-                return NotFound(new ExceptionInfo {
+                return NotFound(new ExceptionInfo
+                {
                     Message = TasksErrorsMessages.TaskNotFound,
                     Description = "Задача не найдена",
                 });
@@ -192,7 +194,8 @@ namespace restcorporate_portal.Controllers
                 .Where(x => x.Worker.Email == email)
                 .ToListAsync();
 
-            return Ok(tasks.Select(x => {
+            return Ok(tasks.Select(x =>
+            {
                 var isExpired = DateTime.Now > x.ExpirationDate;
                 var iconName = x.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
                 var icon = isExpired ?
@@ -219,8 +222,8 @@ namespace restcorporate_portal.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
         [Authorize(AuthenticationSchemes = "Bearer")]
         //[Route("me")]
-        [HttpGet("me/")]
-        public async Task<ActionResult<IEnumerable<Models.Task>>> GetMyTasks()
+        [HttpGet("me/filter/{status}")]
+        public async Task<ActionResult<IEnumerable<ResponseTaskList>>> GetMyTasksInprogress(string status)
         {
             var email = User.Identity.Name;
             var tasks = await _context.Tasks
@@ -229,15 +232,13 @@ namespace restcorporate_portal.Controllers
                 .Include(x => x.Priorirty)
                 .Include(x => x.Worker)
                     .ThenInclude(x => x.Speciality)
-                .Where(x => x.Worker.Email == email)
+                .Where(x => x.Worker.Email == email && x.Status.Name == status && x.ExpirationDate < DateTime.Now)
                 .ToListAsync();
 
-            return Ok(tasks.Select(x => {
-                var isExpired = DateTime.Now > x.ExpirationDate;
+            return Ok(tasks.Select(x =>
+            {
                 var iconName = x.Status.IconUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
-                var icon = isExpired ?
-                    _context.Files.SingleOrDefault(y => y.Name == "Expired.png") :
-                    _context.Files.SingleOrDefault(y => y.Name == iconName);
+                var icon = _context.Files.SingleOrDefault(y => y.Name == iconName);
                 var author = _context.Workers
                     .Include(x => x.Speciality)
                     .SingleOrDefault(y => y.Id == x.AuthorId);
