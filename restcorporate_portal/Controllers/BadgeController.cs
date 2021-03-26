@@ -39,7 +39,7 @@ namespace restcorporate_portal.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseBadgeList>))]
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Badge>>> GetBadges()
+        public async Task<ActionResult<IEnumerable<ResponseBadgeList>>> GetBadges()
         {
             var badges = await _context.Badges.ToListAsync();
             return Ok(badges.Select(x => ResponseBadgeList.FromApiBadge(x)).ToList());
@@ -75,7 +75,7 @@ namespace restcorporate_portal.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseBadgeList>))]
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("me/")]
-        public async Task<ActionResult<IEnumerable<Badge>>> GetMyBadges()
+        public async Task<ActionResult<IEnumerable<ResponseBadgeList>>> GetMyBadges()
         {
             var email = User.Identity.Name;
             var worker = await _context.Workers
