@@ -299,7 +299,7 @@ namespace restcorporate_portal.Controllers
                 icon: icon,
                 author: author,
                 file: file,
-                avatarWorker: _getAvatar(x.Worker.AvatarUrl),
+                avatarWorker: _getAvatar(createdTask.Worker.AvatarUrl),
                 avatarAuthor: _getAvatar(author.AvatarUrl)
             ));
         }
