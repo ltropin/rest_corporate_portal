@@ -176,11 +176,11 @@ namespace restcorporate_portal.Controllers
             var currentProduct = await _context.Products.SingleAsync(x => x.Id == productId);
             var currentUser = await _context.Workers.SingleAsync(x => x.Email == email);
             var productAlreadyContains = _context.FavoriteProductsWorkers
-                .Any(x => x.FavoriteProductId == productId && x.WorkerId == currentUser.Id);
+                .Where(x => x.FavoriteProductId == productId && x.WorkerId == currentUser.Id).ToList();
 
-            if (productAlreadyContains)
+            if (productAlreadyContains.Count > 0)
             {
-                _context.Products.Remove(currentProduct);
+                _context.FavoriteProductsWorkers.RemoveRange(productAlreadyContains);
                 await _context.SaveChangesAsync();
                 return Ok();
             }
