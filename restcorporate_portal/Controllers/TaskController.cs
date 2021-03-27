@@ -18,6 +18,7 @@ namespace restcorporate_portal.Controllers
     static class TasksErrorsMessages
     {
         public const string TaskNotFound = "TASK_NOT_FOUND";
+        public const string TaskOrStatusNotFound = "TASK_OR_STATUS_NOT_FOUND";
     }
 
     [Route("api/tasks")]
@@ -251,36 +252,42 @@ namespace restcorporate_portal.Controllers
             }).ToList());
         }
 
-        // PUT: api/Task/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutTask(int id, Models.Task task)
-        //{
-        //    if (id != task.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+        //PUT: api/tasks/5
+        [SwaggerOperation(
+            Summary = "Изменение статуса задачи",
+            Tags = new string[] { "Задачи" }
+        )]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPut]
+        public async Task<IActionResult> PutTask(RequestTaskPut requestTaskPut)
+        {
+            var currentStatus = await _context.Statuses.SingleOrDefaultAsync(x => x.Id == requestTaskPut.NewStatusId);
+            var currentTask = await _context.Tasks.SingleOrDefaultAsync(x => x.Id == requestTaskPut.TaskId);
 
-        //    _context.Entry(task).State = EntityState.Modified;
+            if (currentTask == null || currentStatus == null)
+            {
+                return NotFound(new ExceptionInfo
+                {
+                    Message = TasksErrorsMessages.TaskOrStatusNotFound,
+                    Description = "Невозможно изменить статус для этой задачи. Обновите страницу."
+                });
+            }
+            if (DateTime.Now > currentTask.ExpirationDate)
+            {
+                currentTask.RewardCoins = (int)Math.Ceiling(currentTask.RewardCoins * 0.7);
+                currentTask.RewardXp = (int)Math.Ceiling(currentTask.RewardXp * 0.7);
+            }
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!TaskExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            currentTask.StatusId = requestTaskPut.NewStatusId;
 
-        //    return NoContent();
-        //}
+            _context.Tasks.Update(currentTask);
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
 
         // POST: api/tasks/me/
         [SwaggerOperation(

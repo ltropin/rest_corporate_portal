@@ -40,7 +40,6 @@
     <Folder Include="Utils\JWT\" />
     <Folder Include="Utils\Validators\" />
     <Folder Include="Utils\Validators\Errors\" />
-    <Folder Include="RequestModels\" />
     <Folder Include="ResponseModels\" />
   </ItemGroup>
 
