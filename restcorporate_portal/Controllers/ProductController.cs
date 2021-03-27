@@ -20,6 +20,7 @@ namespace restcorporate_portal.Controllers
         public const string NotEnoughCoins = "NOT_ENOUGH_COINS";
         public const string ProductAlreadyFavorite = "PRODUCT_ALREADY_FAVORITE";
         public const string ProductNotContainsFavorite = "PRODUCT_NOT_CONTAINS_IN_FAVORITES";
+        public const string FileNotFound = "FILE_NOT_FOUND";
     }
 
     [Route("api/products")]
@@ -105,6 +106,16 @@ namespace restcorporate_portal.Controllers
             var email = User.Identity.Name;
             var currentUser = await _context.Workers.SingleAsync(x => x.Email == email);
             var file = await _context.Files.SingleOrDefaultAsync(x => x.Id == createProduct.FileId);
+
+            if (file == null)
+            {
+                return NotFound(new ExceptionInfo
+                {
+                    Message = ProductErrorsMessages.FileNotFound,
+                    Description = "Не найден файл"
+                });
+            }
+
             var fileUrl = Constans.ApiUrl + Constans.FileDownloadPart + file.Name;
 
             var tempProduct = new Product
