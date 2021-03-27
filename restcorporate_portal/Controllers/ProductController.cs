@@ -108,7 +108,7 @@ namespace restcorporate_portal.Controllers
             _context.PreviousProductsWorkers.Add(new PreviousProductsWorker { PreviousProductId = productId, WorkerId = currentUser.Id });
             var newRecords = await _context.SaveChangesAsync();
 
-            if (currentUser.Balance > currentProduct.Price && newRecords > 0)
+            if (currentUser.Balance >= currentProduct.Price && newRecords > 0)
             {
                 currentUser.Balance -= currentProduct.Price;
                 _context.Workers.Update(currentUser);
