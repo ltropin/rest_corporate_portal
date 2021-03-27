@@ -327,6 +327,7 @@ namespace restcorporate_portal.Controllers
                 RewardXp = createTask.RewardXp,
                 DifficultyId = createTask.DifficultyId,
                 PriorirtyId = createTask.PriorityId,
+                AttachedFileUrl = Constans.ApiUrl + Constans.FileDownloadPart + file.Name,
                 Status = await _context.Statuses.SingleAsync(x => x.Name == "to_do"),
                 WorkerId = createTask.WorkerId
             };
