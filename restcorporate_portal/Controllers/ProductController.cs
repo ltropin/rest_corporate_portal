@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using restcorporate_portal.Exceptions;
 using restcorporate_portal.Models;
+using restcorporate_portal.RequestModels;
 using restcorporate_portal.ResponseModels;
 using restcorporate_portal.Utils;
 using Swashbuckle.AspNetCore.Annotations;
@@ -90,6 +91,40 @@ namespace restcorporate_portal.Controllers
 
         //    return NoContent();
         //}
+
+        // POST: api/products/buy/
+        [SwaggerOperation(
+            Summary = "Добавить товар в магазин",
+            Tags = new string[] { "Магазин" }
+        )]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        public async Task<ActionResult<ResponseProductList>> AddProduct([FromBody] CreateProduct createProduct)
+        {
+            var email = User.Identity.Name;
+            var currentUser = await _context.Workers.SingleAsync(x => x.Email == email);
+            var file = await _context.Files.SingleOrDefaultAsync(x => x.Id == createProduct.FileId);
+            var fileUrl = Constans.ApiUrl + Constans.FileDownloadPart + file.Name;
+
+            var tempProduct = new Product
+            {
+                Name = createProduct.Name,
+                Descriptiom = createProduct.Description,
+                Price = createProduct.Price,
+                ImageUrl = fileUrl
+            };
+            _context.Products.Add(tempProduct);
+            await _context.SaveChangesAsync();
+
+            var addedProduct = await _context.Products
+                .Include(x => x.FavoriteProductsWorkers)
+                .SingleAsync(x => x.Id == tempProduct.Id);
+
+            var isFavorite = addedProduct.FavoriteProductsWorkers.Any(y => y.WorkerId == currentUser.Id && y.FavoriteProductId == addedProduct.Id);
+
+            return Ok(ResponseProductList.FromApiProduct(tempProduct, image: file, isFavorite: isFavorite, isCanBuy: currentUser.Balance >= tempProduct.Price));
+        }
 
         // POST: api/products/buy/
         [SwaggerOperation(
