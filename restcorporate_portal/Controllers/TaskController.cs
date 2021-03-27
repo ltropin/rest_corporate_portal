@@ -260,11 +260,13 @@ namespace restcorporate_portal.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpPut]
+        [HttpPut("status/")]
         public async Task<IActionResult> PutTask(RequestTaskPut requestTaskPut)
         {
             var currentStatus = await _context.Statuses.SingleOrDefaultAsync(x => x.Id == requestTaskPut.NewStatusId);
             var currentTask = await _context.Tasks.SingleOrDefaultAsync(x => x.Id == requestTaskPut.TaskId);
+            var email = User.Identity.Name;
+            var currentUser = await _context.Workers.SingleAsync(x => x.Email == email);
 
             if (currentTask == null || currentStatus == null)
             {
@@ -274,11 +276,23 @@ namespace restcorporate_portal.Controllers
                     Description = "Невозможно изменить статус для этой задачи. Обновите страницу."
                 });
             }
-            if (DateTime.Now > currentTask.ExpirationDate)
+
+            if(requestTaskPut.NewStatusId == 1)
             {
-                currentTask.RewardCoins = (int)Math.Ceiling(currentTask.RewardCoins * 0.7);
-                currentTask.RewardXp = (int)Math.Ceiling(currentTask.RewardXp * 0.7);
+                if (DateTime.Now > currentTask.ExpirationDate)
+                {
+                    currentTask.RewardCoins = (int)Math.Ceiling(currentTask.RewardCoins * 0.7);
+                    currentTask.RewardXp = (int)Math.Ceiling(currentTask.RewardXp * 0.7);
+                   
+                }
+
+                currentUser.Balance += currentTask.RewardCoins;
+                currentUser.Experience += currentTask.RewardXp;
+                _context.Workers.Update(currentUser);
+                await _context.SaveChangesAsync();
             }
+
+            
 
             currentTask.StatusId = requestTaskPut.NewStatusId;
 
@@ -288,6 +302,41 @@ namespace restcorporate_portal.Controllers
 
             return Ok();
         }
+
+        //PUT: api/file/5
+        [SwaggerOperation(
+            Summary = "Изменение приложенного файла задачи",
+            Tags = new string[] { "Задачи" }
+        )]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Ошибка", type: typeof(ExceptionInfo))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", type: typeof(List<ResponseTaskList>))]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPut("file/")]
+        public async Task<IActionResult> PutFile(RequestFilePut requestFilePut)
+        {
+            var currentFile = await _context.Files.SingleOrDefaultAsync(x => Constans.ApiUrl + Constans.FileDownloadPart + x.Name == requestFilePut.NewFileUrl);
+            var currentTask = await _context.Tasks.SingleOrDefaultAsync(x => x.Id == requestFilePut.TaskId);
+            var email = User.Identity.Name;
+            var currentUser = await _context.Workers.SingleAsync(x => x.Email == email);
+
+            if (currentTask == null || currentFile == null)
+            {
+                return NotFound(new ExceptionInfo
+                {
+                    Message = TasksErrorsMessages.TaskOrStatusNotFound,
+                    Description = "Невозможно изменить приложенный файл для этой задачи. Обновите страницу."
+                });
+            }
+
+            currentTask.AttachedFileUrl = requestFilePut.NewFileUrl;
+
+            _context.Tasks.Update(currentTask);
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
 
         // POST: api/tasks/me/
         [SwaggerOperation(
@@ -329,7 +378,8 @@ namespace restcorporate_portal.Controllers
                 PriorirtyId = createTask.PriorityId,
                 AttachedFileUrl = Constans.ApiUrl + Constans.FileDownloadPart + file.Name,
                 Status = await _context.Statuses.SingleAsync(x => x.Name == "to_do"),
-                WorkerId = createTask.WorkerId
+                WorkerId = createTask.WorkerId,
+                AuthorId = author.Id
             };
 
             _context.Tasks.Add(newTask);

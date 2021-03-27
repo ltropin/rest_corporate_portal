@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace restcorporate_portal.RequestModels
 {
-    public class RequestFilePut
+    public class RequestTaskPut
     {
         /// <summary>
         /// Идентификатор изменяемой задачи
@@ -15,9 +15,9 @@ namespace restcorporate_portal.RequestModels
         public int TaskId { get; set; }
 
         /// <summary>
-        /// Новый URL приложенного файла
+        /// Новый статус задачи
         /// </summary>
         [Required]
-        public string NewFileUrl { get; set; }
+        public int NewStatusId { get; set; }
     }
 }

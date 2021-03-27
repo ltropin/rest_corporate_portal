@@ -63,19 +63,23 @@ namespace restcorporate_portal.Controllers
                 .Include(x => x.Speciality)
                     .ThenInclude(x =>  x.Department)
                 .SingleOrDefault(x => x.Email == authModel.Email && x.Password == hashPassword);
-            Models.File avatar;
-            if (existUser.AvatarUrl != null)
-            {
-                var fullFileName = existUser.AvatarUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
-                avatar = _context.Files.SingleOrDefault(x => x.Name == fullFileName);
-            }
-            else
-            {
-                avatar = null;
-            }
-            
+           
             if (existUser != null)
             {
+                Models.File avatar;
+
+
+                if (existUser.AvatarUrl != null)
+                {
+                    var fullFileName = existUser.AvatarUrl.Replace(Constans.ApiUrl + Constans.FileDownloadPart, string.Empty);
+                    avatar = _context.Files.SingleOrDefault(x => x.Name == fullFileName);
+                }
+                else
+                {
+                    avatar = null;
+                }
+
+
                 var token = JWTExtension.CreateToken(existUser);
                 return Ok(new Models.WorkerWithToken {
                     Token = token,
