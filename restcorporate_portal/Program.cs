@@ -48,7 +48,8 @@ namespace restcorporate_portal
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    //webBuilder.UseKestrel();
+                webBuilder.UseKestrel();
+                webBuilder.UseUrls("http://192.168.1.6:5000", "http://localhost:5000");
                     //webBuilder.UseHttpSys();
                     webBuilder.UseStartup<Startup>();
                 });
